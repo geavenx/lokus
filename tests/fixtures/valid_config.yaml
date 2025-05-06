@@ -1,0 +1,12 @@
+allowed_exceptions:
+- key: session_token
+  path_prefix: components.schemas.Session
+forbidden_key_patterns:
+- .*_token$
+forbidden_keys:
+- key1
+- secretKey
+forbidden_keys_at_paths:
+- key: email
+  path: info.contact.email
+  reason: Test reason

@@ -3,26 +3,20 @@ name: Swagger/OpenAPI Validator CI
 on:
   push:
     branches:
-      - main # Or your primary development branch
-      - develop
+      - main
     paths:
-      - 'src/**.py'
-      - 'tests/**.py'
-      - '.forbidden_keys.yaml'
-      - '.github/workflows/swagger_validator.yml'
-      - 'requirements.txt' # If you add one
-      - 'setup.py' # If you add one
+      - "src/**.py"
+      - "tests/**.py"
+      - ".forbidden_keys.yaml"
+      - ".github/workflows/swagger_validator.yml"
   pull_request:
     branches:
       - main
-      - develop
     paths:
-      - 'src/**.py'
-      - 'tests/**.py'
-      - '.forbidden_keys.yaml'
-      - '.github/workflows/swagger_validator.yml'
-      - 'requirements.txt'
-      - 'setup.py'
+      - "src/**.py"
+      - "tests/**.py"
+      - ".forbidden_keys.yaml"
+      - ".github/workflows/swagger_validator.yml"
 
 jobs:
   build_and_test:
@@ -44,12 +38,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install PyYAML pytest
-          # If you create a requirements.txt, use:
-          # pip install -r requirements.txt
+          # TODO: add a requirements.txt here;
 
       - name: Run tests with pytest
         run: |
-          # Ensure PYTHONPATH is set if src is not automatically in path for tests
+          # NOTE: Ensure PYTHONPATH is set if src/ is not automatically in paths
           export PYTHONPATH=${{ github.workspace }}:${{ github.workspace }}/src
           pytest tests/
 
@@ -73,7 +66,7 @@ jobs:
         run: |
           python ${{ github.workspace }}/src/main.py ${{ github.workspace }}/dummy_swagger.yaml --config ${{ github.workspace }}/.forbidden_keys.yaml || echo "VALIDATOR_EXIT_CODE=$?" >> $GITHUB_ENV
         # The '|| echo ...' part ensures the workflow step itself doesn't fail if python exits with non-zero
-        
+
       - name: Assert validator failed as expected
         if: steps.run_validator_fail.outcome == 'success' # This means the python script itself ran
         run: |
@@ -93,4 +86,3 @@ jobs:
         run: |
           python ${{ github.workspace }}/src/main.py ${{ github.workspace }}/dummy_clean_swagger.yaml --config ${{ github.workspace }}/.forbidden_keys.yaml
         # This step should pass (exit code 0)
-

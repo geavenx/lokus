@@ -1,0 +1,1 @@
+forbidden_keys: [key1, key2]: # Invalid YAML, extra colon

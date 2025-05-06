@@ -1,0 +1,4 @@
+forbidden_key_patterns: []
+forbidden_keys:
+- key1
+unknown_top_level_key: some_value
