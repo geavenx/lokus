@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Problematic Sample API
+  version: 1.0.2
+  description: This API specification includes several items that should be caught by the validator.
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: dev_contact@example.com # Should be caught by default config
+  # This is a globally forbidden key
+  secretKey: "donttellanyone"
+
+servers:
+  - url: http://api.example.com/v1
+
+paths:
+  /users:
+    post:
+      summary: Create a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                # This is a globally forbidden key
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created
+  /admin/debug:
+    get:
+      summary: Debug endpoint with sensitive token
+      parameters:
+        - name: debug_session_token # Should be caught by pattern .*_token$
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Debug information
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        # This is a path-specific forbidden key from default config
+        password:
+          type: string
+          description: User's password, should not be in schema this way.
+  securitySchemes:
+    # This is a globally forbidden key
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY # The name X-API-KEY is in default forbidden_keys
+    # This one should be allowed if an exception is made for it, but not by default
+    AppTokenAuth:
+      type: apiKey
+      in: header
+      name: application_auth_token # Caught by pattern
+

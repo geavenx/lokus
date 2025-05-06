@@ -1,0 +1,96 @@
+name: Swagger/OpenAPI Validator CI
+
+on:
+  push:
+    branches:
+      - main # Or your primary development branch
+      - develop
+    paths:
+      - 'src/**.py'
+      - 'tests/**.py'
+      - '.forbidden_keys.yaml'
+      - '.github/workflows/swagger_validator.yml'
+      - 'requirements.txt' # If you add one
+      - 'setup.py' # If you add one
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**.py'
+      - 'tests/**.py'
+      - '.forbidden_keys.yaml'
+      - '.github/workflows/swagger_validator.yml'
+      - 'requirements.txt'
+      - 'setup.py'
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyYAML pytest
+          # If you create a requirements.txt, use:
+          # pip install -r requirements.txt
+
+      - name: Run tests with pytest
+        run: |
+          # Ensure PYTHONPATH is set if src is not automatically in path for tests
+          export PYTHONPATH=${{ github.workspace }}:${{ github.workspace }}/src
+          pytest tests/
+
+      - name: Create dummy Swagger and Config for basic run test
+        run: |
+          echo "openapi: 3.0.0\ninfo:\n  title: Test API for CI\n  version: 1.0.0\npaths:\n  /test:\n    get:\n      summary: Test endpoint\n      responses:\n        '200':\n          description: OK\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  apiKey: { type: string } # This should be caught by default config"
+          > ${{ github.workspace }}/dummy_swagger.yaml
+          # Using the default .forbidden_keys.yaml already in the repo
+
+      - name: Run Swagger Validator on dummy file (expect failure)
+        run: |
+          python ${{ github.workspace }}/src/main.py ${{ github.workspace }}/dummy_swagger.yaml --config ${{ github.workspace }}/.forbidden_keys.yaml
+        # This step is expected to fail (exit code 1) because dummy_swagger.yaml contains 'apiKey'
+        # We can make it more robust by checking the exit code explicitly if needed,
+        # or by having a clean dummy file for a success check.
+        # For now, let's allow it to fail to demonstrate the validator catching an issue.
+        continue-on-error: true # Allow this step to "fail" (exit 1) without failing the whole workflow
+
+      - name: Run Swagger Validator on dummy file and check exit code (expect failure)
+        id: run_validator_fail
+        run: |
+          python ${{ github.workspace }}/src/main.py ${{ github.workspace }}/dummy_swagger.yaml --config ${{ github.workspace }}/.forbidden_keys.yaml || echo "VALIDATOR_EXIT_CODE=$?" >> $GITHUB_ENV
+        # The '|| echo ...' part ensures the workflow step itself doesn't fail if python exits with non-zero
+        
+      - name: Assert validator failed as expected
+        if: steps.run_validator_fail.outcome == 'success' # This means the python script itself ran
+        run: |
+          if [ "${{ env.VALIDATOR_EXIT_CODE }}" -eq 1 ]; then
+            echo "Validator correctly exited with 1 (issues found)."
+          else
+            echo "Validator exited with ${{ env.VALIDATOR_EXIT_CODE }} instead of 1. This is an error."
+            exit 1
+          fi
+
+      - name: Create clean dummy Swagger for success test
+        run: |
+          echo "openapi: 3.0.0\ninfo:\n  title: Clean API for CI\n  version: 1.0.0\npaths:\n  /test:\n    get:\n      summary: Test endpoint\n      responses:\n        '200':\n          description: OK"
+          > ${{ github.workspace }}/dummy_clean_swagger.yaml
+
+      - name: Run Swagger Validator on clean dummy file (expect success)
+        run: |
+          python ${{ github.workspace }}/src/main.py ${{ github.workspace }}/dummy_clean_swagger.yaml --config ${{ github.workspace }}/.forbidden_keys.yaml
+        # This step should pass (exit code 0)
+
