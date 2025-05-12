@@ -29,7 +29,7 @@ paths:
                 password:
                   type: string
       responses:
-        '201':
+        "201":
           description: User created
   /admin/debug:
     get:
@@ -41,7 +41,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Debug information
 
 components:
@@ -59,11 +59,11 @@ components:
     # This is a globally forbidden key
     ApiKeyAuth:
       type: apiKey
-      in: header
+      in: query # This will fail - API keys should be in header or cookie
       name: X-API-KEY # The name X-API-KEY is in default forbidden_keys
     # This one should be allowed if an exception is made for it, but not by default
     AppTokenAuth:
       type: apiKey
-      in: header
+      in: query # This will also fail - API keys should be in header or cookie
       name: application_auth_token # Caught by pattern
 
