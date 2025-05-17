@@ -2,7 +2,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from src.security_validator import SecurityIssue
+from security_validator import SecurityIssue
 
 
 def report_findings(
