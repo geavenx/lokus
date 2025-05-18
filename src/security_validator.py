@@ -109,6 +109,7 @@ class SecurityValidator:
         for path, path_item in paths.items():
             for method, operation in path_item.items():
                 # Check for rate limiting headers in responses
+                print(operation)
                 responses = operation.get("responses", {})
                 if "429" not in responses:
                     self.issues.append(

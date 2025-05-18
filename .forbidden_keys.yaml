@@ -6,37 +6,37 @@
 # --- Globally Forbidden Keys ---
 # These keys are generally considered unsafe to expose directly in API specifications.
 forbidden_keys:
-  - "apiKey"           # Common name for API keys
-  - "secretKey"        # Generic secret key
-  - "client_secret"    # OAuth client secret
-  - "password"         # User passwords
-  - "token"            # Generic token that might be sensitive
-  - "bearerToken"      # Bearer tokens
-  - "access_token"     # Access tokens
-  - "refresh_token"    # Refresh tokens
-  - "private_key"      # Private keys
+  - "apiKey" # Common name for API keys
+  - "secretKey" # Generic secret key
+  - "client_secret" # OAuth client secret
+  - "password" # User passwords
+  - "token" # Generic token that might be sensitive
+  - "bearerToken" # Bearer tokens
+  - "access_token" # Access tokens
+  - "refresh_token" # Refresh tokens
+  - "private_key" # Private keys
   - "aws_access_key_id"
   - "aws_secret_access_key"
   - "azure_client_secret"
   - "google_api_key"
   # Examples of custom headers that might leak internal details or keys
-  - "x-api-key"        # Common custom header for API keys
+  - "x-api-key" # Common custom header for API keys
   - "x-auth-token"
   - "x-internal-service-key"
-  - "x-debug-enabled"    # Debug flags that shouldn't be in prod specs
-  - "x-trace-id"         # While useful for debugging, might be too verbose or internal for public specs
+  - "x-debug-enabled" # Debug flags that shouldn't be in prod specs
+  - "x-trace-id" # While useful for debugging, might be too verbose or internal for public specs
 
 # --- Forbidden Key Patterns (Regular Expressions) ---
 # These patterns help catch variations or more complex key names.
 # The regex should match the entire key.
 forbidden_key_patterns:
-  - ".*_secret$"              # Matches any key ending with _secret (e.g., "user_secret", "db_secret")
-  - ".*_token$"               # Matches any key ending with _token (e.g., "session_token", "auth_token") - Be mindful of exceptions
-  - ".*_key$"                 # Matches any key ending with _key (e.g., "encryption_key") - Be mindful of exceptions
-  - ".*password.*"            # Matches any key containing "password" (case-insensitive can be added if regex engine supports it easily or by listing variations)
-  - "^x-sensitive-.*"         # Matches custom headers starting with x-sensitive-
-  - "^internal_.*"            # Matches keys starting with internal_
-  - ".*_credential[s]?$"     # Matches keys ending with _credential or _credentials
+  - ".*_secret$" # Matches any key ending with _secret (e.g., "user_secret", "db_secret")
+  - ".*_token$" # Matches any key ending with _token (e.g., "session_token", "auth_token") - Be mindful of exceptions
+  - ".*_key$" # Matches any key ending with _key (e.g., "encryption_key") - Be mindful of exceptions
+  - ".*password.*" # Matches any key containing "password" (case-insensitive can be added if regex engine supports it easily or by listing variations)
+  - "^x-sensitive-.*" # Matches custom headers starting with x-sensitive-
+  - "^internal_.*" # Matches keys starting with internal_
+  - ".*_credential[s]?$" # Matches keys ending with _credential or _credentials
 
 # --- Keys Forbidden Only at Specific Paths ---
 # This allows for more granular control. Paths use dot-notation.
@@ -50,8 +50,9 @@ forbidden_keys_at_paths:
     reason: "Placeholder TODOs in public API descriptions should be resolved."
   # Example: Forbidding default values that might be insecure
   - path: "components.schemas.*.properties.*.default" # Path to a default value of a property
-    key: "admin" # If the *value* of default is 'admin', this rule can't catch it. This rule catches if the *key name* is 'admin'.
-                 # To check values, the tool would need to be extended. This rule is more about a key named 'admin' at this path.
+    key:
+      "admin" # If the *value* of default is 'admin', this rule can't catch it. This rule catches if the *key name* is 'admin'.
+      # To check values, the tool would need to be extended. This rule is more about a key named 'admin' at this path.
     reason: "Default value 'admin' for a property might be an insecure default. This rule is illustrative for a key named 'admin' at this path."
   - path: "securitySchemes.*.description"
     key: "description" # Forbid detailed descriptions for security schemes if they might leak info
@@ -74,7 +75,6 @@ allowed_exceptions:
   - key: "token_type"
     path_prefix: "components.schemas.AuthResponse.properties.token_type"
     reason: "'token_type' (e.g., 'Bearer') is a standard field in authentication responses."
-
 # Security Note:
 # This configuration file is a critical part of your API security posture.
 # - Review and update it regularly based on your organization's policies and emerging threats.

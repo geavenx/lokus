@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import json
 from typing import Any, Dict, List, Optional
 
+from lgpd_validator import LGPDIssue
 from security_validator import SecurityIssue
 
 
@@ -12,26 +12,29 @@ def report_findings(
     output_format: str = "text",
     verbose: bool = False,
     security_issues: Optional[List[SecurityIssue]] = None,
+    lgpd_issues: Optional[List[LGPDIssue]] = None,
 ) -> int:
     """
-    Reports the findings of the validation and exits with the appropriate status code.
+    Reports the findings from the validation process.
 
     Args:
-        findings: A list of dictionaries, where each dictionary is a finding.
-        swagger_file_path: Path to the validated Swagger file.
-        config_file_path: Path to the configuration file used.
-        output_format: "text" or "json".
-        verbose: Boolean for verbose output (mainly for text format).
-        security_issues: Optional list of security issues found during validation.
+        findings: List of forbidden key findings.
+        swagger_file_path: Path to the Swagger/OpenAPI file.
+        config_file_path: Path to the configuration file.
+        output_format: Format of the output (text or json).
+        verbose: Whether to include verbose output.
+        security_issues: Optional list of security issues.
+        lgpd_issues: Optional list of LGPD compliance issues.
+
+    Returns:
+        int: Exit code (0 for success, 1 for issues found, 2 for errors).
     """
     if output_format == "json":
-        report_data = {
-            "swagger_file_path": swagger_file_path,
-            "config_file_path": config_file_path,
-            "status": "passed" if not findings and not security_issues else "failed",
-            "findings_count": len(findings),
+        # JSON output format
+        output = {
+            "swagger_file": swagger_file_path,
+            "config_file": config_file_path,
             "findings": findings,
-            "security_issues_count": len(security_issues) if security_issues else 0,
             "security_issues": [
                 {
                     "rule_id": issue.rule_id,
@@ -40,11 +43,24 @@ def report_findings(
                     "severity": issue.severity.value,
                     "path": issue.path,
                     "recommendation": issue.recommendation,
+                    "reference": issue.reference,
                 }
                 for issue in (security_issues or [])
             ],
+            "lgpd_issues": [
+                {
+                    "rule_id": issue.rule_id,
+                    "title": issue.title,
+                    "description": issue.description,
+                    "severity": issue.severity.value,
+                    "path": issue.path,
+                    "recommendation": issue.recommendation,
+                    "reference": issue.reference,
+                }
+                for issue in (lgpd_issues or [])
+            ],
         }
-        print(json.dumps(report_data, indent=2))
+        print(output)
     else:  # Default to text format
         print("Swagger/OpenAPI Specification Validator")
         print("--------------------------------------")
@@ -52,7 +68,7 @@ def report_findings(
         print(f"Configuration File: {config_file_path}")
         print("")
 
-        has_issues = bool(findings or security_issues)
+        has_issues = bool(findings or security_issues or lgpd_issues)
 
         if has_issues:
             print("STATUS: VALIDATION FAILED")
@@ -79,6 +95,19 @@ def report_findings(
                     print(f"     Recommendation: {issue.recommendation}")
                     print(f"     Reference: {issue.reference}")
                     if i < len(security_issues):
+                        print("")
+
+            if lgpd_issues:
+                print(f"\nLGPD Compliance Issues Found: {len(lgpd_issues)}")
+                print("--------------------------------------")
+                for i, issue in enumerate(lgpd_issues, 1):
+                    print(f"  {i}. [{issue.severity.value}] {issue.title}")
+                    print(f"     Rule ID: {issue.rule_id}")
+                    print(f"     Path: {issue.path}")
+                    print(f"     Description: {issue.description}")
+                    print(f"     Recommendation: {issue.recommendation}")
+                    print(f"     Reference: {issue.reference}")
+                    if i < len(lgpd_issues):
                         print("")
 
             print(

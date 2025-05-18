@@ -4,6 +4,7 @@ import sys
 from cli import parse_arguments
 from config_loader import load_config
 from deep_search import deep_search_forbidden_keys
+from lgpd_validator import LGPDValidator
 from reporter import report_findings
 from security_validator import SecurityValidator
 from yaml_parser import load_swagger_spec
@@ -48,7 +49,17 @@ def main():
     if args.verbose:
         print(f"Security validation completed. Found {len(security_issues)} issue(s).")
 
-    # 5. Report findings and get exit code from reporter
+    # 5. Perform LGPD compliance validation
+    if args.verbose:
+        print("Starting LGPD compliance validation...")
+    lgpd_validator = LGPDValidator()
+    lgpd_issues = lgpd_validator.validate_spec(swagger_data)
+    if args.verbose:
+        print(
+            f"LGPD compliance validation completed. Found {len(lgpd_issues)} issue(s)."
+        )
+
+    # 6. Report findings and get exit code from reporter
     # The reporter function will print to stdout based on the format
     exit_code = report_findings(
         findings,
@@ -57,6 +68,7 @@ def main():
         args.format,
         args.verbose,
         security_issues=security_issues,
+        lgpd_issues=lgpd_issues,
     )
 
     sys.exit(exit_code)

@@ -1,0 +1,130 @@
+openapi: 3.0.0
+info:
+  title: Non-LGPD-Compliant API
+  version: 1.0.0
+  description: |
+    This API demonstrates common LGPD compliance violations.
+    It includes sensitive data in examples and descriptions, uses direct identifiers,
+    and lacks proper data minimization and purpose limitation documentation.
+  contact:
+    name: API Support
+    email: support@example.com # Violation: Email in description
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+
+paths:
+  /users/{cpf}: # Violation: Direct identifier in path
+    get:
+      summary: Get user by CPF
+      description: Get user information using CPF 123.456.789-00 # Violation: CPF in description
+      operationId: getUserByCPF
+      parameters:
+        - name: cpf
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "123.456.789-00" # Violation: Real CPF in example
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users:
+    post:
+      summary: Create user
+      # Violation: Missing purpose description
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - name
+        - email
+        - cpf # Violation: Sensitive field name
+        - rg # Violation: Sensitive field name
+      properties:
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+        email:
+          type: string
+          description: User's email address
+          example: "john.doe@example.com" # Violation: Real email in example
+        cpf:
+          type: string
+          description: User's CPF number
+          example: "123.456.789-00" # Violation: Real CPF in example
+        rg:
+          type: string
+          description: User's RG number
+          example: "12.345.678-9" # Violation: Real RG in example
+        phone:
+          type: string
+          description: User's phone number
+          example: "+55 11 98765-4321" # Violation: Real phone in example
+        extra_field: # Violation: Unnecessary field without description
+          type: string
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - cpf # Violation: Sensitive field name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+        email:
+          type: string
+          description: User's email address
+          example: "john.doe@example.com" # Violation: Real email in example
+        cpf:
+          type: string
+          description: User's CPF number
+          example: "123.456.789-00" # Violation: Real CPF in example
+        rg:
+          type: string
+          description: User's RG number
+          example: "12.345.678-9" # Violation: Real RG in example
+        phone:
+          type: string
+          description: User's phone number
+          example: "+55 11 98765-4321" # Violation: Real phone in example
+        birth_date: # Violation: Sensitive field name
+          type: string
+          format: date
+          description: User's birth date
+          example: "1990-01-01" # Violation: Real birth date in example
+        address: # Violation: Sensitive field name
+          type: string
+          description: User's full address
+          example: "Rua Example, 123, São Paulo, SP" # Violation: Real address in example
