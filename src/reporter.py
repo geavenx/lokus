@@ -60,7 +60,7 @@ def report_findings(
                 for issue in (lgpd_issues or [])
             ],
         }
-        print(output)
+        # print(output)
     else:  # Default to text format
         print("Swagger/OpenAPI Specification Validator")
         print("--------------------------------------")
