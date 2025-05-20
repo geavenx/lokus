@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import sys
 
-from cli import parse_arguments
-from config_loader import load_config
-from deep_search import deep_search_forbidden_keys
-from lgpd_validator import LGPDValidator
-from reporter import report_findings
-from security_validator import SecurityValidator
-from yaml_parser import load_swagger_spec
+from src.cli import parse_arguments
+from src.config_loader import load_config
+from src.deep_search import deep_search_forbidden_keys
+from src.lgpd_validator import LGPDValidator
+from src.reporter import report_findings
+from src.security_validator import SecurityValidator
+from src.yaml_parser import load_swagger_spec
 
 __version__ = "0.1.0"
 

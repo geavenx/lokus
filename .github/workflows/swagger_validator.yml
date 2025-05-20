@@ -43,7 +43,7 @@ jobs:
         run: uv run pytest tests
 
       - name: Run Swagger Validator on dummy file (expect failure)
-        run: uv run src/main.py sample_problem_spec.yaml
+        run: uv run run.py sample_problem_spec.yaml
         # This step is expected to fail (exit code 1) because dummy_swagger.yaml contains 'apiKey'
         # We can make it more robust by checking the exit code explicitly if needed,
         # or by having a clean dummy file for a success check.
@@ -52,5 +52,5 @@ jobs:
 
       - name: Run Swagger Validator on clean dummy file (expect success)
         run: |
-          uv run src/main.py sample_clean_spec.yaml
+          uv run run.py sample_clean_spec.yaml
         # This step should pass (exit code 0)
