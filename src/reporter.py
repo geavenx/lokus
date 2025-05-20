@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 from typing import Any, Dict, List, Optional
 
 from src.lgpd_validator import LGPDIssue
@@ -29,6 +30,9 @@ def report_findings(
     Returns:
         int: Exit code (0 for success, 1 for issues found, 2 for errors).
     """
+
+    has_issues = bool(findings or security_issues or lgpd_issues)
+
     if output_format == "json":
         # JSON output format
         output = {
@@ -60,15 +64,13 @@ def report_findings(
                 for issue in (lgpd_issues or [])
             ],
         }
-        # print(output)
+        print(json.dumps(output))
     else:  # Default to text format
         print("Swagger/OpenAPI Specification Validator")
         print("--------------------------------------")
         print(f"Specification File: {swagger_file_path}")
         print(f"Configuration File: {config_file_path}")
         print("")
-
-        has_issues = bool(findings or security_issues or lgpd_issues)
 
         if has_issues:
             print("STATUS: VALIDATION FAILED")
