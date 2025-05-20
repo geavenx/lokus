@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from typing import Any, Dict, List, Optional
 
-from lgpd_validator import LGPDIssue
-from security_validator import SecurityIssue
+from src.lgpd_validator import LGPDIssue
+from src.security_validator import SecurityIssue
 
 
 def report_findings(
