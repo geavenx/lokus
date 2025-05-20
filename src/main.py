@@ -5,11 +5,12 @@ from src.cli import parse_arguments
 from src.config_loader import load_config
 from src.deep_search import deep_search_forbidden_keys
 from src.lgpd_validator import LGPDValidator
+from src.pdf_reporter import pdf_reporter
 from src.reporter import report_findings
 from src.security_validator import SecurityValidator
 from src.yaml_parser import load_swagger_spec
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 
 def main():
@@ -23,18 +24,21 @@ def main():
         print(f"Output format: {args.format}")
 
     # 1. Load configuration
+
     config_data = load_config(args.config)
     if config_data is None:
         # load_config already prints error messages
         sys.exit(2)  # Configuration error
 
     # 2. Load Swagger specification
+
     swagger_data = load_swagger_spec(args.swagger_file)
     if swagger_data is None:
         # load_swagger_spec already prints error messages
         sys.exit(2)  # Swagger file error
 
     # 3. Perform deep search for forbidden keys
+
     if args.verbose:
         print("Starting deep search for forbidden keys...")
     findings = deep_search_forbidden_keys(swagger_data, "", config_data, args.verbose)
@@ -42,6 +46,7 @@ def main():
         print(f"Deep search completed. Found {len(findings)} item(s).")
 
     # 4. Perform security validation
+
     if args.verbose:
         print("Starting security validation...")
     security_validator = SecurityValidator()
@@ -50,6 +55,7 @@ def main():
         print(f"Security validation completed. Found {len(security_issues)} issue(s).")
 
     # 5. Perform LGPD compliance validation
+
     if args.verbose:
         print("Starting LGPD compliance validation...")
     lgpd_validator = LGPDValidator()
@@ -61,6 +67,7 @@ def main():
 
     # 6. Report findings and get exit code from reporter
     # The reporter function will print to stdout based on the format
+
     exit_code = report_findings(
         findings,
         args.swagger_file,
@@ -70,6 +77,15 @@ def main():
         security_issues=security_issues,
         lgpd_issues=lgpd_issues,
     )
+
+    # 7. Generate a PDF file with reports
+
+    if args.pdf:
+        pdf_reporter(
+            findings,
+            security_issues=security_issues,
+            lgpd_issues=lgpd_issues,
+        )
 
     sys.exit(exit_code)
 

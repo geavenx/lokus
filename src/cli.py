@@ -30,6 +30,11 @@ def parse_arguments():
         default="text",
         help="Output format for the validation report. (default: text)",
     )
+
+    parser.add_argument(
+        "--pdf", action="store_true", help="Generate a PDF file with report findings"
+    )
+
     # Add a version argument
     parser.add_argument(
         "--version", action="version", version="%(prog)s 0.1.0"  # Placeholder version
