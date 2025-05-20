@@ -1,73 +1,45 @@
 openapi: 3.0.0
 info:
-  title: Clean Sample API
-  version: 1.0.1
-  description: This is a sample API specification that should pass validation.
-  contact:
-    name: API Support
-    url: http://www.example.com/support
-    # email: support@example.com # Intentionally commented out to pass one rule
-
-servers:
-  - url: http://api.example.com/v1
-
+  title: Clean API for CI
+  version: 1.0.0
 paths:
-  /items:
+  /test:
     get:
-      summary: List all items
-      operationId: listItems
-      tags:
-        - items
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
+      summary: Test endpoint
+      security:
+        - api_key: [] # Applying API key security to this endpoint
       responses:
-        '200':
-          description: A paged array of items
+        "200":
+          description: OK
+        "429":
+          description: Too Many Requests
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Items'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: TOO_MANY_REQUESTS
+                    description: aa
+                  message:
+                    type: string
+                    example: You have exceeded your API rate limit.
+                    description: bb
 components:
-  schemas:
-    Item:
-      type: object
-      required:
-        - id
-        - name
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-    Items:
-      type: array
-      items:
-        $ref: "#/components/schemas/Item"
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
-
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-API-Key
+      in: header
+  # You might define rate limiting configurations here if your API gateway or
+  # proxy supports it via OpenAPI extensions, e.g., x-amazon-apigateway-api-key-source.
+  # Otherwise, this is typically handled at the infrastructure level (API Gateway, reverse proxy).
+  # For demonstration purposes, I'm adding a custom vendor extension for hypothetical rate limiting
+  # configuration that a custom tool or gateway might interpret.
+  # This is not a standard OpenAPI field.
+  x-rate-limit-configs:
+    /test:
+      get:
+        limit: 100 # requests per minute
+        interval: 60 # seconds

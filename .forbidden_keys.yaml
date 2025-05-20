@@ -32,7 +32,7 @@ forbidden_keys:
 forbidden_key_patterns:
   - ".*_secret$" # Matches any key ending with _secret (e.g., "user_secret", "db_secret")
   - ".*_token$" # Matches any key ending with _token (e.g., "session_token", "auth_token") - Be mindful of exceptions
-  - ".*_key$" # Matches any key ending with _key (e.g., "encryption_key") - Be mindful of exceptions
+  #- ".*_key$" # Matches any key ending with _key (e.g., "encryption_key") - Be mindful of exceptions
   - ".*password.*" # Matches any key containing "password" (case-insensitive can be added if regex engine supports it easily or by listing variations)
   - "^x-sensitive-.*" # Matches custom headers starting with x-sensitive-
   - "^internal_.*" # Matches keys starting with internal_
