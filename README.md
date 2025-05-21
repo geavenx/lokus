@@ -1,5 +1,6 @@
 # Swagger/OpenAPI Specification Validator
 
+
 [![Swagger/OpenAPI Validator CI](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml)
 
 This tool validates Swagger/OpenAPI specification files (YAML format) against a configurable list of forbidden keys, patterns, and path-specific rules. It helps ensure API specifications don't contain certain forbidden keys, sensitive information, or insecure configurations.
