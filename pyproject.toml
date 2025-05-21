@@ -1,7 +1,19 @@
+[build-system]
+requires = ["setuptools >= 75.3.2"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "swagger-validator-v2"
+name = "swagger-validator"
 version = "1.0.0"
-description = "Add your description here"
+description = "Swagger-Validator: Find issues in your APIs from the docs"
+authors = [
+    {name = "Vitor Cardoso", email = "vitor.cardoso5@fatec.sp.gov.br"},
+    {name = "Robson Damasceno"},
+    {name = "Virgílio Oliveira"}
+]
+maintainers = [
+    {name = "Vitor Cardoso", email = "vitor.cardoso5@fatec.sp.gov.br"}
+]
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
@@ -9,8 +21,16 @@ dependencies = [
     "reportlab>=4.4.1",
     "typer>=0.15.4",
 ]
+keywords = ["security", "lgpd", "swagger", "api", "openapi"]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
 ]
+
+
+[project.scripts]
+swagger-validator = "swagger_validator.main:main"
+
+[tool.setuptools]
+packages = ["swagger_validator"]

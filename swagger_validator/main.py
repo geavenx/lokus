@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import sys
 
-from src.cli import parse_arguments
-from src.config_loader import load_config
-from src.deep_search import deep_search_forbidden_keys
-from src.lgpd_validator import LGPDValidator
-from src.pdf_reporter import pdf_reporter
-from src.reporter import report_findings
-from src.security_validator import SecurityValidator
-from src.yaml_parser import load_swagger_spec
+from swagger_validator.cli import parse_arguments
+from swagger_validator.config_loader import load_config
+from swagger_validator.deep_search import deep_search_forbidden_keys
+from swagger_validator.lgpd_validator import LGPDValidator
+from swagger_validator.pdf_reporter import pdf_reporter
+from swagger_validator.reporter import report_findings
+from swagger_validator.security_validator import SecurityValidator
+from swagger_validator.yaml_parser import load_swagger_spec
 
 __version__ = "1.0.0"
 

@@ -2,8 +2,8 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from src.lgpd_validator import LGPDIssue
-from src.security_validator import SecurityIssue
+from swagger_validator.lgpd_validator import LGPDIssue
+from swagger_validator.security_validator import SecurityIssue
 
 
 def report_findings(
