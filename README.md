@@ -1,44 +1,86 @@
 # Swagger/OpenAPI Specification Validator
 
-
 [![Swagger/OpenAPI Validator CI](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This tool validates Swagger/OpenAPI specification files (YAML format) against a configurable list of forbidden keys, patterns, and path-specific rules. It helps ensure API specifications don't contain certain forbidden keys, sensitive information, or insecure configurations.
+A powerful tool for validating Swagger/OpenAPI specification files (YAML format) against configurable security rules and LGPD compliance requirements. This validator helps ensure your API specifications don't contain forbidden keys, sensitive information, or insecure configurations.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [LGPD Compliance Features](#lgpd-compliance-features)
+- [Usage Examples](#usage-examples)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ## Features
 
-- Loads a configuration file (`.forbidden_keys.yaml` by default) to get the list of forbidden items.
-- Parses Swagger/OpenAPI YAML files.
-- Performs a deep search through all parts of the specification.
-- Reports any instances of forbidden keys found, including their path.
-- Exits with status code `0` if validation passes, `1` if issues are found, and `2` for other errors (e.g., file not found, parsing issues).
-- Supports text and JSON output formats.
-- Integrates with GitHub Actions for CI/CD.
-- Includes LGPD (Brazilian General Data Protection Law) compliance validation.
+- 🔍 Deep search through all parts of the specification
+- ⚙️ Configurable forbidden keys, patterns, and path-specific rules
+- 📝 Multiple output formats (text and JSON)
+- 🔄 GitHub Actions integration for CI/CD
+- 🛡️ LGPD (Brazilian General Data Protection Law) compliance validation
+- 🚦 Clear exit codes for different scenarios:
+  - `0`: Validation passes
+  - `1`: Issues found
+  - `2`: Other errors (file not found, parsing issues)
 
-## LGPD Compliance Features
+## Installation
 
-The validator includes specific checks for LGPD compliance:
+- **Building from source:**
 
-1. **Sensitive Data Detection**
-   - Identifies common sensitive data patterns (CPF, CNPJ, RG, email, phone numbers)
-   - Flags sensitive data in examples and descriptions
-   - Detects sensitive field names in schemas and parameters
+    ```bash
+    git clone https://github.com/geavenx/swagger-validator-v2.git
+    cd swagger-validator-v2
+    pip install -e . # The use of a virtual environment is recommended
+    swagger-validator --version
+    ```
 
-2. **Data Minimization**
-   - Ensures all properties have proper descriptions
-   - Flags unnecessary fields without justification
-   - Validates that only required data is collected
+- **Using [uv](https://docs.astral.sh/uv/):**
 
-3. **Purpose Limitation**
-   - Requires clear descriptions of data processing purposes
-   - Validates that endpoints have proper documentation
-   - Ensures transparency in data handling
+    ```bash
+    git clone https://github.com/geavenx/swagger-validator-v2.git
+    cd swagger-validator-v2
+    uv sync --locked --all-extras
+    uv run swagger_validator --version
+    ```
 
-4. **Direct Identifier Protection**
-   - Flags direct identifiers in API paths
-   - Recommends using indirect identifiers (e.g., UUIDs)
-   - Prevents exposure of sensitive identifiers
+
+## Quick Start
+
+1. Create a configuration file (`.forbidden_keys.yaml`):
+
+    ```yaml
+    forbidden_keys:
+      - "apiKey"
+      - "secretKey"
+      - "password"
+
+    forbidden_key_patterns:
+      - ".*_token$"
+      - "^internal_.*"
+    ```
+
+2. Run the validator:
+
+```bash
+# Validate a single file
+swagger-validator path/to/your/api.yaml
+
+# Validate multiple files
+swagger-validator path/to/specs/*.yaml
+
+# Use custom config file
+swagger-validator --config custom_config.yaml path/to/your/api.yaml
+
+# Generate JSON report
+swagger-validator --format json path/to/your/api.yaml
+```
 
 ## Configuration
 
@@ -71,6 +113,66 @@ allowed_exceptions:
     path_prefix: "components.schemas.Session"
 ```
 
+## LGPD Compliance Features
+
+The validator includes specific checks for LGPD compliance:
+
+1. **Sensitive Data Detection**
+   - Identifies common sensitive data patterns (CPF, CNPJ, RG, email, phone numbers)
+   - Flags sensitive data in examples and descriptions
+   - Detects sensitive field names in schemas and parameters
+
+2. **Data Minimization**
+   - Ensures all properties have proper descriptions
+   - Flags unnecessary fields without justification
+   - Validates that only required data is collected
+
+3. **Purpose Limitation**
+   - Requires clear descriptions of data processing purposes
+   - Validates that endpoints have proper documentation
+   - Ensures transparency in data handling
+
+4. **Direct Identifier Protection**
+   - Flags direct identifiers in API paths
+   - Recommends using indirect identifiers (e.g., UUIDs)
+   - Prevents exposure of sensitive identifiers
+
+## Usage Examples
+
+### Basic Validation
+
+```bash
+# Validate a single API specification
+swagger-validator api.yaml
+
+# Validate with custom config
+swagger-validator --config security_rules.yaml api.yaml
+```
+
+### CI/CD Integration
+
+Add this to your GitHub Actions workflow:
+
+```yaml
+name: Validate API Specs
+
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install swagger-validator
+        run: pip install swagger-validator
+      - name: Validate API specs
+        run: swagger-validator validate specs/*.yaml
+```
+
 ## Contributing
 
 1. Fork the repository
@@ -81,7 +183,7 @@ allowed_exceptions:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
