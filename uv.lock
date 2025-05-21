@@ -417,9 +417,9 @@ wheels = [
 ]
 
 [[package]]
-name = "swagger-validator-v2"
+name = "swagger-validator"
 version = "1.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "pyyaml" },
     { name = "reportlab" },
