@@ -1,5 +1,6 @@
 # Swagger/OpenAPI Specification Validator
 
+
 [![Swagger/OpenAPI Validator CI](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml)
 
 This tool validates Swagger/OpenAPI specification files (YAML format) against a configurable list of forbidden keys, patterns, and path-specific rules. It helps ensure API specifications don't contain certain forbidden keys, sensitive information, or insecure configurations.
@@ -38,81 +39,6 @@ The validator includes specific checks for LGPD compliance:
    - Flags direct identifiers in API paths
    - Recommends using indirect identifiers (e.g., UUIDs)
    - Prevents exposure of sensitive identifiers
-
-## Project Structure
-
-```txt
-swagger_validator/
-├── .github/
-│   └── workflows/
-│       └── swagger_validator.yml  # GitHub Actions CI workflow
-├── src/
-│   ├── __init__.py
-│   ├── cli.py                     # Command-line argument parser
-│   ├── config_loader.py           # Loads .forbidden_keys.yaml
-│   ├── deep_search.py             # Core logic for finding forbidden keys
-│   ├── lgpd_validator.py          # LGPD compliance validation
-│   ├── main.py                    # Main executable script
-│   ├── reporter.py                # Handles output formatting and exit codes
-│   └── yaml_parser.py             # Loads Swagger/OpenAPI YAML files
-├── tests/
-│   ├── __init__.py
-│   ├── fixtures/                  # Test fixture files (sample configs, specs)
-│   ├── test_cli.py
-│   ├── test_config_loader.py
-│   ├── test_deep_search.py
-│   ├── test_lgpd_validator.py     # LGPD validator tests
-│   ├── test_reporter.py
-│   └── test_yaml_parser.py
-├── samples/
-│   ├── lgpd_compliant_spec.yaml   # Example of LGPD-compliant spec
-│   └── lgpd_non_compliant_spec.yaml # Example of non-compliant spec
-├── .forbidden_keys.yaml           # Default configuration for forbidden keys
-├── .gitignore
-├── README.md                      # This file
-└── requirements.txt               # Python dependencies
-```
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/yourusername/swagger-validator-v2.git
-   cd swagger-validator-v2
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Usage
-
-Basic usage:
-
-```bash
-python src/main.py path/to/your/swagger.yaml
-```
-
-With custom configuration:
-
-```bash
-python src/main.py path/to/your/swagger.yaml --config path/to/config.yaml
-```
-
-With verbose output:
-
-```bash
-python src/main.py path/to/your/swagger.yaml --verbose
-```
-
-With JSON output:
-
-```bash
-python src/main.py path/to/your/swagger.yaml --format json
-```
 
 ## Configuration
 
