@@ -12,6 +12,7 @@ from src.security_validator import SecurityIssue, SecurityIssueSeverity
 
 
 def pdf_reporter(
+    swagger_file_path: str,
     findings: List[Dict[str, Any]],
     security_issues: Optional[List[SecurityIssue]] = None,
     lgpd_issues: Optional[List[LGPDIssue]] = None,
@@ -60,9 +61,18 @@ def pdf_reporter(
     }
 
     # --- Title Page ---
-    story.append(Paragraph("Security and Compliance Report", h1))
+    story.append(Paragraph("Swagger Validator", h1))
     story.append(Spacer(1, 0.2 * inch))
-    story.append(Paragraph("Generated on 5/20/2025, 7:38:49 PM GMT-3", normal_style))
+    now = datetime.now()
+    story.append(
+        Paragraph(
+            f"Generated on {now.strftime('%-m/%-d/%Y, %-I:%M:%S %p')} GMT-3",
+            normal_style,
+        )
+    )
+    story.append(Spacer(1, 0.2 * inch))
+    story.append(Paragraph(f"Swagger file analyzed: {swagger_file_path}"))
+
     story.append(Spacer(1, 0.5 * inch))
     story.append(Paragraph("Summary of Findings and Issues", normal_style))
     story.append(PageBreak())

@@ -82,7 +82,8 @@ def main():
 
     if args.pdf:
         pdf_reporter(
-            findings,
+            swagger_file_path=args.swagger_file,
+            findings=findings,
             security_issues=security_issues,
             lgpd_issues=lgpd_issues,
         )
