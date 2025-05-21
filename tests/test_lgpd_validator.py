@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import pytest
 
-from src.lgpd_validator import LGPDValidator
+from swagger_validator.lgpd_validator import LGPDValidator
 
 
 @pytest.fixture

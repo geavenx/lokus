@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import pytest
 import json
-from src.reporter import report_findings
+from swagger_validator.reporter import report_findings
 
 
 @pytest.fixture
