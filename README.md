@@ -151,27 +151,7 @@ swagger-validator --config security_rules.yaml api.yaml
 
 ### CI/CD Integration
 
-Add this to your GitHub Actions workflow:
-
-```yaml
-name: Validate API Specs
-
-on: [push, pull_request]
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install swagger-validator
-        run: pip install swagger-validator
-      - name: Validate API specs
-        run: swagger-validator validate specs/*.yaml
-```
+Check the integration in [this project workflow file.](.github/workflows/swagger_validator.yml)
 
 ## Contributing
 
