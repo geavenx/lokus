@@ -32,6 +32,13 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 
 ## Installation
 
+- **Using docker:**
+
+    ```bash
+    git clone https://github.com/geavenx/swagger-validator-v2.git
+    docker build -q --tag="swagger-validator":"latest" .
+    ```
+
 - **Building from source:**
 
     ```bash
@@ -68,19 +75,30 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 
 2. Run the validator:
 
-```bash
-# Validate a single file
-swagger-validator path/to/your/api.yaml
+    ```bash
+    # Validate a single file
+    swagger-validator path/to/your/api.yaml
 
-# Validate multiple files
-swagger-validator path/to/specs/*.yaml
+    # Validate multiple files
+    swagger-validator path/to/specs/*.yaml
 
-# Use custom config file
-swagger-validator --config custom_config.yaml path/to/your/api.yaml
+    # Use custom config file
+    swagger-validator --config custom_config.yaml path/to/your/api.yaml
 
-# Generate JSON report
-swagger-validator --format json path/to/your/api.yaml
-```
+    # Generate JSON report
+    swagger-validator --format json path/to/your/api.yaml
+    ```
+
+    - Using docker:
+ 
+    ```bash
+    # Validate a single file
+    docker run --rm swagger-validator:latest path/to/your/api.yaml
+
+    # Get help
+    docker run --rm swagger-validator:latest --help
+    ```
+
 
 ## Configuration
 
