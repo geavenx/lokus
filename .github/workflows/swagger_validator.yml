@@ -20,7 +20,11 @@ on:
 
 jobs:
   build_and_test:
+    name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout repository
@@ -34,7 +38,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
-        run: uv python install # This will respect the Python version pinned in the project
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install the project
         run: uv sync --locked --all-extras --dev
