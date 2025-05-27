@@ -78,8 +78,7 @@ def main(swagger_file: str, config: str, verbose: bool, json: bool, pdf: bool) -
 
     # 6. Report findings and get exit code from reporter
     # The reporter function will print to stdout based on the format
-
-    exit_code = report_findings(
+    report_findings(
         findings,
         swagger_file,
         config,
@@ -90,7 +89,6 @@ def main(swagger_file: str, config: str, verbose: bool, json: bool, pdf: bool) -
     )
 
     # 7. Generate a PDF file with reports
-
     if pdf:
         pdf_reporter(
             swagger_file_path=swagger_file,

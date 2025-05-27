@@ -66,4 +66,3 @@ components:
       type: apiKey
       in: query # This will also fail - API keys should be in header or cookie
       name: application_auth_token # Caught by pattern
-

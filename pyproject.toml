@@ -26,6 +26,7 @@ keywords = ["security", "lgpd", "swagger", "api", "openapi"]
 
 [dependency-groups]
 dev = [
+    "pre-commit>=3.5.0",
     "pytest>=8.3.5",
 ]
 
