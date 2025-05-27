@@ -38,16 +38,8 @@ def pdf_reporter(
     # Custom styles for different text elements
     h1 = styles["h1"]
     h2 = styles["h2"]
-    h3 = styles["h3"]
     normal_style = styles["Normal"]
     bold_style = ParagraphStyle("Bold", parent=normal_style, fontName="Helvetica-Bold")
-    code_style = ParagraphStyle(
-        "Code",
-        parent=normal_style,
-        fontName="Courier",
-        fontSize=10,
-        textColor=black,
-    )
 
     # Severity specific colors
     severity_colors = {

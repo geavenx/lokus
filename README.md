@@ -57,7 +57,6 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
     uv run swagger_validator --version
     ```
 
-
 ## Quick Start
 
 1. Create a configuration file (`.forbidden_keys.yaml`):
@@ -90,7 +89,7 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
     ```
 
     - Using docker:
- 
+
     ```bash
     # Validate a single file
     docker run --rm swagger-validator:latest path/to/your/api.yaml
@@ -98,7 +97,6 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
     # Get help
     docker run --rm swagger-validator:latest --help
     ```
-
 
 ## Configuration
 

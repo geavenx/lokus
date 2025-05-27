@@ -80,4 +80,3 @@ allowed_exceptions:
 # - Review and update it regularly based on your organization's policies and emerging threats.
 # - Ensure changes to this file are peer-reviewed.
 # - Do NOT store actual secret values in this file. It defines key *names* and *patterns* to look for.
-

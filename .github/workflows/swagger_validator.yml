@@ -4,20 +4,19 @@ on:
   push:
     branches:
       - main
-      - developer
     paths:
-      - "src/**.py"
-      - "tests/**.py"
-      - ".forbidden_keys.yaml"
       - ".github/workflows/swagger_validator.yml"
+      - "**.md"
+      - "**.py"
+      - "**.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - "src/**.py"
-      - "tests/**.py"
-      - ".forbidden_keys.yaml"
       - ".github/workflows/swagger_validator.yml"
+      - "**.md"
+      - "**.py"
+      - "**.yaml"
 
 jobs:
   build_and_test:
@@ -42,14 +41,6 @@ jobs:
 
       - name: Run tests
         run: uv run pytest tests
-
-      - name: Run Swagger Validator on dummy file (expect failure)
-        run: uv run swagger_validator sample_problem_spec.yaml
-        # This step is expected to fail (exit code 1) because dummy_swagger.yaml contains 'apiKey'
-        # We can make it more robust by checking the exit code explicitly if needed,
-        # or by having a clean dummy file for a success check.
-        # For now, let's allow it to fail to demonstrate the validator catching an issue.
-        continue-on-error: true # Allow this step to "fail" (exit 1) without failing the whole workflow
 
       - name: Run Swagger Validator on clean dummy file (expect success)
         run: |

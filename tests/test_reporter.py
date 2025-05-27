@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import pytest
-import json
 from swagger_validator.reporter import report_findings
 
 
@@ -36,7 +35,7 @@ def test_report_findings_text_with_issues(capsys, sample_findings_list):
     assert "STATUS: VALIDATION FAILED" in captured.out
     assert "info.contact.email" in captured.out
     assert "x-api-key" in captured.out
-    assert f'Key \t"x-api-key"\t is globally forbidden.' in captured.out
+    assert 'Key \t"x-api-key"\t is globally forbidden.' in captured.out
     assert exit_code == 1
 
 
