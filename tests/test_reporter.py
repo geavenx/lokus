@@ -30,7 +30,7 @@ def empty_findings_list():
 # Test text output with findings
 def test_report_findings_text_with_issues(capsys, sample_findings_list):
     exit_code = report_findings(
-        sample_findings_list, "test_spec.yaml", "test_config.yaml", "text"
+        sample_findings_list, "test_spec.yaml", "test_config.yaml"
     )
     captured = capsys.readouterr()
     assert "STATUS: VALIDATION FAILED" in captured.out
@@ -91,7 +91,7 @@ def test_report_findings_text_with_issues(capsys, sample_findings_list):
 # Test verbose flag (currently doesn't change reporter output itself, but test it's accepted)
 def test_report_findings_verbose_flag(capsys, sample_findings_list):
     exit_code = report_findings(
-        sample_findings_list, "test_spec.yaml", "test_config.yaml", "text", verbose=True
+        sample_findings_list, "test_spec.yaml", "test_config.yaml", verbose=True
     )
     captured = capsys.readouterr()  # Just ensure it runs without error
     assert "STATUS: VALIDATION FAILED" in captured.out
