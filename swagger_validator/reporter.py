@@ -10,7 +10,7 @@ def report_findings(
     findings: List[Dict[str, Any]],
     swagger_file_path: str,
     config_file_path: str,
-    output_format: str = "text",
+    output_json: bool = False,
     verbose: bool = False,
     security_issues: Optional[List[SecurityIssue]] = None,
     lgpd_issues: Optional[List[LGPDIssue]] = None,
@@ -22,7 +22,7 @@ def report_findings(
         findings: List of forbidden key findings.
         swagger_file_path: Path to the Swagger/OpenAPI file.
         config_file_path: Path to the configuration file.
-        output_format: Format of the output (text or json).
+        output_json: Format of the output to JSON.
         verbose: Whether to include verbose output.
         security_issues: Optional list of security issues.
         lgpd_issues: Optional list of LGPD compliance issues.
@@ -33,7 +33,7 @@ def report_findings(
 
     has_issues = bool(findings or security_issues or lgpd_issues)
 
-    if output_format == "json":
+    if output_json:
         # JSON output format
         output = {
             "swagger_file": swagger_file_path,
