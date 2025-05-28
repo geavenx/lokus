@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # This will monitor pyproject.toml
+  - package-ecosystem: "pip"
+    directory: "/"
+    # Check for updates weekly on Mondays
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Set pull request limit to avoid too many PRs
+    open-pull-requests-limit: 3
+    labels: # PR labels for organization
+      - "dependencies"
+      - "python"
+
+    # Group dependency updates by type for cleaner PRs
+    groups:
+      production-dependencies:
+        patterns:
+          - "click*"
+          - "pydantic*"
+          - "pyyaml*"
+          - "reportlab*"
+      development-dependencies:
+        patterns:
+          - "pre-commit*"
+          - "pytest*"
+      build-dependencies:
+        patterns:
+          - "setuptools*"
+    # Set assignees for pull requests
+    assignees:
+      - "geavenx"
+
+    # Allow both direct and indirect dependencies updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    # Set commit message prefix
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+    # Updates pyproject.toml.
+    # uv.lock will be updated in a separate workflow.
