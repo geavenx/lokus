@@ -1,6 +1,6 @@
-NAME="swagger-validator"
+NAME=swagger-validator
 VERSION=1.0.0
 
 all:
-	docker build -q --tag=$(NAME):$(VERSION) .
-	docker tag $(NAME):$(VERSION) $(NAME):latest
+	docker build --tag="geaven/$(NAME):$(VERSION)" .
+	docker tag "geaven/$(NAME):$(VERSION)" "geaven/$(NAME):latest"
