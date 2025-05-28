@@ -32,13 +32,10 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 
 ## Installation
 
-- **Using docker:**
+- **Using docker (recommended):**
 
     ```bash
-    git clone https://github.com/geavenx/swagger-validator-v2.git
-    cd swagger-validator-v2
-    docker build --tag="swagger-validator:latest" .
-    docker run -it --rm swagger-validator --help
+    docker run -qit --rm geaven/swagger-validator --verion
     ```
 
 - **Building from source:**
