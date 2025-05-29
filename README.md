@@ -35,7 +35,7 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 - **Using docker (recommended):**
 
     ```bash
-    docker run -qit --rm geaven/swagger-validator --verion
+    docker run -qit --rm geaven/swagger-validator --version
     ```
 
 - **Building from source:**
