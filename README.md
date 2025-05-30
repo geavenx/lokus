@@ -30,6 +30,38 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
   - `1`: Issues found
   - `2`: Other errors (file not found, parsing issues)
 
+## How It Works
+
+```mermaid
+flowchart TD
+    A[Swagger/OpenAPI Spec] --> B[Load Configuration]
+    A --> C[Load Swagger Spec]
+    B --> D[Deep Search]
+    C --> D
+    D --> E[Security Validation]
+    D --> F[LGPD Compliance]
+    E --> G[Report Findings]
+    F --> G
+    G --> H{Output Format}
+    H -->|Text| I[Console Output]
+    H -->|JSON| J[JSON Report]
+    H -->|PDF| K[PDF Report]
+
+    subgraph Configuration
+        B --> B1[Forbidden Keys]
+        B --> B2[Key Patterns]
+        B --> B3[Path Rules]
+    end
+
+    subgraph Validation
+        D --> D1[Search Keys]
+        D --> D2[Check Patterns]
+        E --> E1[Security Rules]
+        F --> F1[Data Protection]
+        F --> F2[Purpose Limitation]
+    end
+```
+
 ## Installation
 
 - **Using docker (recommended):**
