@@ -1,11 +1,11 @@
-name: Swagger/OpenAPI Validator CI
+name: Lokus Validator CI
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/swagger_validator.yml"
+      - ".github/workflows/lokus.yml"
       - "**.md"
       - "**.py"
       - "**.yaml"
@@ -13,7 +13,7 @@ on:
     branches:
       - main
     paths:
-      - ".github/workflows/swagger_validator.yml"
+      - ".github/workflows/lokus.yml"
       - "**.md"
       - "**.py"
       - "**.yaml"
@@ -46,7 +46,7 @@ jobs:
       - name: Run tests
         run: uv run pytest tests
 
-      - name: Run Lokuw on clean dummy file (expect success)
+      - name: Run Lokus on clean dummy file (expect success)
         run: |
           uv run lokus sample_clean_spec.yaml
         # This step should pass (exit code 0)
