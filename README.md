@@ -35,7 +35,7 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 ```mermaid
 flowchart TD
     A[Swagger/OpenAPI Spec] --> B[Load Configuration]
-    A --> C[Load Swagger Spec]
+    B --> C[Load Swagger Spec]
     B --> D[Deep Search]
     C --> D
     D --> E[Security Validation]
@@ -58,7 +58,8 @@ flowchart TD
         D --> D2[Check Patterns]
         E --> E1[Security Rules]
         F --> F1[Data Protection]
-        F --> F2[Purpose Limitation]
+        F --> F2[Purpose Definition]
+
     end
 ```
 
