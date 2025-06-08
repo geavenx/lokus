@@ -1,5 +1,5 @@
 NAME=lokus
-VERSION=1.0.0
+VERSION=1.0.1
 
 all:
 	docker build --tag="geaven/$(NAME):$(VERSION)" .

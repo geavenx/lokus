@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Lokus"
-version = "1.0.0"
+version = "1.0.1"
 description = "Lokus: Find issues in your APIs from the docs"
 authors = [
     {name = "Vitor Cardoso", email = "vitor.cardoso5@fatec.sp.gov.br"},
