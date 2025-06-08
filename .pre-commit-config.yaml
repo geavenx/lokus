@@ -12,17 +12,11 @@ repos:
         files: \.(md|markdown)$
         args: [--disable, MD013]
 
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
-    rev: 0.7.8
-    hooks:
-      - id: uv-lock
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.11.11
     hooks:
       - id: ruff-check # Linter
-        args: [--fix]
+        args: [--fix, --show-fixes]
 
       - id: ruff-format # Formatter
