@@ -85,4 +85,4 @@ def test_version_flag(runner: CliRunner):
     """Test command with the version flag."""
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
-    assert "swagger-validator, version " in result.output
+    assert "lokus, version " in result.output
