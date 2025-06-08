@@ -46,7 +46,7 @@ jobs:
       - name: Run tests
         run: uv run pytest tests
 
-      - name: Run Swagger Validator on clean dummy file (expect success)
+      - name: Run Lokuw on clean dummy file (expect success)
         run: |
-          uv run swagger_validator sample_clean_spec.yaml
+          uv run lokus sample_clean_spec.yaml
         # This step should pass (exit code 0)
