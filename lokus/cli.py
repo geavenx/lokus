@@ -12,7 +12,7 @@ from lokus.yaml_parser import load_swagger_spec
 
 
 @click.command()
-@click.version_option(prog_name="swagger-validator")
+@click.version_option(prog_name="lokus")
 @click.argument(
     "swagger_file",
     type=str,

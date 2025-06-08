@@ -1,4 +1,4 @@
-NAME=swagger-validator
+NAME=lokus
 VERSION=1.0.0
 
 all:

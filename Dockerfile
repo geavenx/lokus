@@ -13,4 +13,4 @@ COPY . .
 RUN uv sync --locked --no-dev
 
 
-ENTRYPOINT ["uv", "run", "-q", "swagger-validator"]
+ENTRYPOINT ["uv", "run", "-q", "lokus"]

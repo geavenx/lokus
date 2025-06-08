@@ -1,6 +1,6 @@
 # Lokus: Swagger/OpenAPI Specification Validator
 
-[![Swagger/OpenAPI Validator CI](https://github.com/geavenx/Lokus/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/Lokus/actions/workflows/swagger_validator.yml)
+[![Lokus Validator CI](https://github.com/geavenx/Lokus/actions/workflows/lokus.yml/badge.svg)](https://github.com/geavenx/Lokus/actions/workflows/lokus.yml)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -67,23 +67,23 @@ flowchart TD
 - **Using docker (recommended):**
 
     ```bash
-    docker run -qit --rm geaven/swagger-validator --version
+    docker run -qit --rm geaven/lokus --version
     ```
 
 - **Building from source:**
 
     ```bash
-    git clone https://github.com/geavenx/swagger-validator-v2.git
-    cd swagger-validator-v2
+    git clone https://github.com/geavenx/lokus.git
+    cd lokus
     pip install -e . # The use of a virtual environment is recommended
-    swagger-validator --version
+    lokus --version
     ```
 
 - **Using [uv](https://docs.astral.sh/uv/):**
 
     ```bash
-    git clone https://github.com/geavenx/swagger-validator-v2.git
-    cd swagger-validator-v2
+    git clone https://github.com/geavenx/lokus.git
+    cd lokus
     uv sync --locked --all-extras
     uv run lokus --version
     ```
@@ -107,26 +107,26 @@ flowchart TD
 
     ```bash
     # Validate a single file
-    swagger-validator path/to/your/api.yaml
+    lokus path/to/your/api.yaml
 
     # Validate multiple files
-    swagger-validator path/to/specs/*.yaml
+    lokus path/to/specs/*.yaml
 
     # Use custom config file
-    swagger-validator --config custom_config.yaml path/to/your/api.yaml
+    lokus --config custom_config.yaml path/to/your/api.yaml
 
     # Generate JSON report
-    swagger-validator --format json path/to/your/api.yaml
+    lokus --json path/to/your/api.yaml
     ```
 
     - Using docker:
 
     ```bash
     # Validate a single file
-    docker run --rm swagger-validator:latest path/to/your/api.yaml
+    docker run -qit --rm geaven/lokus:latest path/to/your/api.yaml
 
     # Get help
-    docker run --rm swagger-validator:latest --help
+    docker run -qit --rm geaven/lokus:latest --help
     ```
 
 ## Configuration
@@ -190,15 +190,15 @@ The validator includes specific checks for LGPD compliance:
 
 ```bash
 # Validate a single API specification
-swagger-validator api.yaml
+lokus api.yaml
 
 # Validate with custom config
-swagger-validator --config security_rules.yaml api.yaml
+lokus --config security_rules.yaml api.yaml
 ```
 
 ### CI/CD Integration
 
-Check the integration in [this project workflow file.](.github/workflows/swagger_validator.yml)
+Check the integration in [this project workflow file.](.github/workflows/lokus.yml)
 
 ## Contributing
 

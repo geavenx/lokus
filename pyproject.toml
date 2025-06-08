@@ -21,6 +21,7 @@ dependencies = [
     "pydantic>=2.10.6",
     "pyyaml>=6.0.2",
     "reportlab>=4.4.1",
+    "svglib>=1.5.1",
 ]
 keywords = ["security", "lgpd", "swagger", "api", "openapi"]
 
@@ -32,7 +33,7 @@ dev = [
 
 
 [project.scripts]
-swagger-validator = "lokus.cli:main"
+lokus = "lokus.cli:main"
 
 [tool.setuptools]
 packages = ["lokus"]
