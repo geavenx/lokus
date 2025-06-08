@@ -19,6 +19,6 @@ if __name__ == "__main__":
         )
         sys.exit(1)
 
-    from swagger_validator import cli
+    from lokus import cli
 
     cli.main()

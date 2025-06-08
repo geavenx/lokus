@@ -4,7 +4,7 @@ import os
 import pytest
 import yaml  # For creating test fixture content
 
-from swagger_validator.yaml_parser import load_swagger_spec
+from lokus.yaml_parser import load_swagger_spec
 
 FIXTURES_DIR = "tests/fixtures"
 

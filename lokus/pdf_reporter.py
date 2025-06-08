@@ -7,8 +7,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import black, red, orange, yellow, green
 
-from swagger_validator.lgpd_validator import LGPDIssue, LGPDIssueSeverity
-from swagger_validator.security_validator import SecurityIssue, SecurityIssueSeverity
+from lokus.lgpd_validator import LGPDIssue, LGPDIssueSeverity
+from lokus.security_validator import SecurityIssue, SecurityIssueSeverity
 
 
 def pdf_reporter(

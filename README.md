@@ -1,6 +1,6 @@
-# Swagger/OpenAPI Specification Validator
+# Lokus: Swagger/OpenAPI Specification Validator
 
-[![Swagger/OpenAPI Validator CI](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/swagger-validator-v2/actions/workflows/swagger_validator.yml)
+[![Swagger/OpenAPI Validator CI](https://github.com/geavenx/Lokus/actions/workflows/swagger_validator.yml/badge.svg)](https://github.com/geavenx/Lokus/actions/workflows/swagger_validator.yml)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -24,11 +24,43 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 - ⚙️ Configurable forbidden keys, patterns, and path-specific rules
 - 📝 Multiple output formats (text and JSON)
 - 🔄 GitHub Actions integration for CI/CD
-- 🛡️ LGPD (Brazilian General Data Protection Law) compliance validation
+- 🛡️ LGPD (Brazilian General Data Protection Law) copliance validation
 - 🚦 Clear exit codes for different scenarios:
   - `0`: Validation passes
   - `1`: Issues found
   - `2`: Other errors (file not found, parsing issues)
+
+## How It Works
+
+```mermaid
+flowchart TD
+    A[Swagger/OpenAPI Spec] --> B[Load Configuration]
+    A --> C[Load Swagger Spec]
+    B --> D[Deep Search]
+    C --> D
+    D --> E[Security Validation]
+    D --> F[LGPD Compliance]
+    E --> G[Report Findings]
+    F --> G
+    G --> H{Output Format}
+    H -->|Text| I[Console Output]
+    H -->|JSON| J[JSON Report]
+    H -->|PDF| K[PDF Report]
+
+    subgraph Configuration
+        B --> B1[Forbidden Keys]
+        B --> B2[Key Patterns]
+        B --> B3[Path Rules]
+    end
+
+    subgraph Validation
+        D --> D1[Search Keys]
+        D --> D2[Check Patterns]
+        E --> E1[Security Rules]
+        F --> F1[Data Protection]
+        F --> F2[Purpose Limitation]
+    end
+```
 
 ## Installation
 
@@ -53,7 +85,7 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
     git clone https://github.com/geavenx/swagger-validator-v2.git
     cd swagger-validator-v2
     uv sync --locked --all-extras
-    uv run swagger_validator --version
+    uv run lokus --version
     ```
 
 ## Quick Start
