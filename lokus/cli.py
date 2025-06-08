@@ -2,13 +2,13 @@ import sys
 
 import click
 
-from swagger_validator.config_loader import load_config
-from swagger_validator.deep_search import deep_search_forbidden_keys
-from swagger_validator.lgpd_validator import LGPDValidator
-from swagger_validator.pdf_reporter import pdf_reporter
-from swagger_validator.reporter import report_findings
-from swagger_validator.security_validator import SecurityValidator
-from swagger_validator.yaml_parser import load_swagger_spec
+from lokus.config_loader import load_config
+from lokus.deep_search import deep_search_forbidden_keys
+from lokus.lgpd_validator import LGPDValidator
+from lokus.pdf_reporter import pdf_reporter
+from lokus.reporter import report_findings
+from lokus.security_validator import SecurityValidator
+from lokus.yaml_parser import load_swagger_spec
 
 
 @click.command()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import pytest
 
-from swagger_validator.deep_search import deep_search_forbidden_keys
+from lokus.deep_search import deep_search_forbidden_keys
 
 
 # Sample configurations and data for testing deep_search

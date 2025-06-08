@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import pytest
-from swagger_validator.reporter import report_findings
+from lokus.reporter import report_findings
 
 
 @pytest.fixture

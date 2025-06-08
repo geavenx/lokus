@@ -3,7 +3,7 @@ import os
 import pytest
 from click.testing import CliRunner
 
-from swagger_validator.cli import main
+from lokus.cli import main
 
 
 SAMPLES_DIR = "tests/samples"
