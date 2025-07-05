@@ -1,0 +1,299 @@
+# Enterprise Configuration
+# Comprehensive configuration for enterprise environments with strict compliance requirements
+
+forbidden_keys:
+  # Authentication and authorization
+  - "apiKey"
+  - "password"
+  - "secretKey"
+  - "token"
+  - "secret"
+  - "key"
+  - "auth"
+  - "credential"
+  - "pass"
+  - "pwd"
+  - "access_token"
+  - "refresh_token"
+  - "bearer_token"
+  - "jwt"
+  - "session"
+  - "cookie"
+  - "oauth"
+  - "saml"
+  - "ldap"
+  
+  # Infrastructure and configuration
+  - "database"
+  - "db_password"
+  - "connection_string"
+  - "api_secret"
+  - "private_key"
+  - "client_secret"
+  - "app_secret"
+  - "config"
+  - "environment"
+  - "server"
+  - "host"
+  - "port"
+  - "endpoint"
+  - "internal"
+  - "admin"
+  - "root"
+  
+  # Personal and sensitive data (LGPD/GDPR compliance)
+  - "email"
+  - "phone"
+  - "ssn"
+  - "cpf"
+  - "cnpj"
+  - "rg"
+  - "passport"
+  - "credit_card"
+  - "card_number"
+  - "account_number"
+  - "bank_account"
+  - "pix"
+  - "birth_date"
+  - "age"
+  - "gender"
+  - "race"
+  - "religion"
+  - "political_opinion"
+  
+  # Health and biometric data
+  - "health"
+  - "medical"
+  - "biometric"
+  - "fingerprint"
+  - "facial_recognition"
+  - "dna"
+  
+  # Financial information
+  - "salary"
+  - "income"
+  - "financial"
+  - "payment"
+  - "billing"
+  - "invoice"
+  - "transaction"
+  
+  # Internal system references
+  - "internal_id"
+  - "system_id"
+  - "debug"
+  - "test"
+  - "staging"
+  - "development"
+
+forbidden_key_patterns:
+  # Authentication patterns
+  - ".*_token$"
+  - ".*_key$"
+  - ".*_secret$"
+  - ".*_password$"
+  - ".*_pass$"
+  - ".*_pwd$"
+  - ".*_auth$"
+  - ".*_credential$"
+  - "^secret_.*"
+  - "^api_.*_secret$"
+  - "^auth_.*"
+  - "^credential_.*"
+  - "^oauth_.*"
+  - "^jwt_.*"
+  
+  # Infrastructure patterns
+  - ".*_url$"
+  - ".*_host$"
+  - ".*_port$"
+  - ".*_database$"
+  - ".*_db$"
+  - ".*_connection.*"
+  - ".*_config$"
+  - ".*_env$"
+  - "^internal_.*"
+  - "^system_.*"
+  - "^admin_.*"
+  - "^root_.*"
+  
+  # Personal data patterns (multilingual)
+  - ".*email.*"
+  - ".*phone.*"
+  - ".*telefone.*"
+  - ".*celular.*"
+  - ".*cpf.*"
+  - ".*cnpj.*"
+  - ".*rg.*"
+  - ".*ssn.*"
+  - ".*passport.*"
+  - ".*_address.*"
+  - ".*_endereco.*"
+  - ".*personal.*"
+  - ".*pessoal.*"
+  - ".*private.*"
+  - ".*privado.*"
+  - ".*sensitive.*"
+  - ".*sensivel.*"
+  
+  # Financial patterns
+  - ".*financial.*"
+  - ".*financeiro.*"
+  - ".*bank.*"
+  - ".*banco.*"
+  - ".*credit.*"
+  - ".*credito.*"
+  - ".*payment.*"
+  - ".*pagamento.*"
+  - ".*salary.*"
+  - ".*salario.*"
+  - ".*income.*"
+  - ".*renda.*"
+  
+  # Health patterns
+  - ".*health.*"
+  - ".*saude.*"
+  - ".*medical.*"
+  - ".*medico.*"
+  - ".*biometric.*"
+  - ".*biometrico.*"
+  
+  # Development/testing patterns
+  - ".*test.*"
+  - ".*debug.*"
+  - ".*staging.*"
+  - ".*dev.*"
+  - ".*development.*"
+
+forbidden_keys_at_paths:
+  # Info section restrictions
+  - path: "info.contact.email"
+    key: "email"
+    reason: "Contact email should not expose internal addresses"
+  
+  - path: "info.license.url"
+    key: "url"
+    reason: "License URL should not expose internal systems"
+  
+  - path: "info.termsOfService"
+    key: "url"
+    reason: "Terms of service URL should not expose internal systems"
+  
+  # Server restrictions
+  - path: "servers"
+    key: "url"
+    reason: "Server URLs should not expose internal infrastructure"
+  
+  - path: "servers"
+    key: "description"
+    reason: "Server descriptions should not contain sensitive information"
+  
+  # Security schemes
+  - path: "components.securitySchemes"
+    key: "apiKey"
+    reason: "API keys should not be embedded in specification"
+  
+  - path: "components.securitySchemes"
+    key: "tokenUrl"
+    reason: "Token URLs should not expose internal endpoints"
+  
+  - path: "components.securitySchemes"
+    key: "authorizationUrl"
+    reason: "Authorization URLs should not expose internal endpoints"
+  
+  # Examples and schemas
+  - path: "components.examples"
+    key: "value"
+    reason: "Examples should not contain real sensitive data"
+  
+  - path: "components.schemas"
+    key: "example"
+    reason: "Schema examples should not contain real data"
+  
+  - path: "components.schemas"
+    key: "default"
+    reason: "Default values should not contain sensitive information"
+  
+  # Path parameters
+  - path: "paths"
+    key: "id"
+    reason: "Direct database IDs should not be used (use UUIDs instead)"
+  
+  - path: "paths"
+    key: "user_id"
+    reason: "Direct user IDs should not be used (use UUIDs instead)"
+  
+  - path: "paths"
+    key: "email"
+    reason: "Email should not be used as path parameter"
+  
+  - path: "paths"
+    key: "cpf"
+    reason: "CPF should not be used as path parameter"
+  
+  # Headers
+  - path: "components.headers"
+    key: "X-Internal"
+    reason: "Internal headers should not be documented publicly"
+  
+  - path: "components.headers"
+    key: "X-Debug"
+    reason: "Debug headers should not be documented publicly"
+
+allowed_exceptions:
+  # Legitimate security-related schemas
+  - key: "security"
+    path_prefix: "components.schemas"
+    reason: "Security-related schema definitions are legitimate"
+  
+  - key: "auth"
+    path_prefix: "paths./auth"
+    reason: "Authentication endpoints are legitimate"
+  
+  - key: "login"
+    path_prefix: "paths./login"
+    reason: "Login endpoints are legitimate"
+  
+  - key: "token"
+    path_prefix: "components.schemas.TokenResponse"
+    reason: "Token response schema is legitimate"
+  
+  - key: "refresh_token"
+    path_prefix: "components.schemas.TokenResponse"
+    reason: "Refresh token in response schema is legitimate"
+  
+  # LGPD/GDPR compliance related
+  - key: "consent"
+    path_prefix: "components.schemas"
+    reason: "Consent-related fields are required for compliance"
+  
+  - key: "data_processing_consent"
+    path_prefix: "components.schemas"
+    reason: "Data processing consent is required for LGPD compliance"
+  
+  - key: "privacy_policy_accepted"
+    path_prefix: "components.schemas"
+    reason: "Privacy policy acceptance is required for compliance"
+  
+  # Verification status fields
+  - key: "email_verified"
+    path_prefix: "components.schemas"
+    reason: "Email verification status is legitimate"
+  
+  - key: "phone_verified"
+    path_prefix: "components.schemas"
+    reason: "Phone verification status is legitimate"
+  
+  # Business contact information
+  - key: "email"
+    path_prefix: "components.schemas.BusinessContact"
+    reason: "Business contact email is legitimate"
+  
+  - key: "phone"
+    path_prefix: "components.schemas.BusinessContact"
+    reason: "Business contact phone is legitimate"
+  
+  # Public configuration
+  - key: "public_key"
+    path_prefix: "components.schemas.PublicConfiguration"
+    reason: "Public keys for client-side encryption are legitimate"

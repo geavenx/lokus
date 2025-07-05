@@ -122,3 +122,4 @@ dmypy.json
 .pyre/
 
 *.pdf
+CLAUDE.md

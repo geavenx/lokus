@@ -14,6 +14,7 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 - [Configuration](#configuration)
 - [LGPD Compliance Features](#lgpd-compliance-features)
 - [Usage Examples](#usage-examples)
+- [CI/CD Templates](#cicd-templates)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -22,9 +23,10 @@ A powerful tool for validating Swagger/OpenAPI specification files (YAML format)
 
 - 🔍 Deep search through all parts of the specification
 - ⚙️ Configurable forbidden keys, patterns, and path-specific rules
-- 📝 Multiple output formats (text and JSON)
-- 🔄 GitHub Actions integration for CI/CD
-- 🛡️ LGPD (Brazilian General Data Protection Law) copliance validation
+- 📝 Multiple output formats (text, JSON, and PDF)
+- 🔄 Ready-to-use CI/CD templates for GitHub Actions
+- 🛡️ LGPD (Brazilian General Data Protection Law) compliance validation
+- 🔒 OWASP API Security Top 10 validation
 - 🚦 Clear exit codes for different scenarios:
   - `0`: Validation passes
   - `1`: Issues found
@@ -118,6 +120,9 @@ flowchart TD
 
     # Generate JSON report
     lokus --json path/to/your/api.yaml
+    
+    # Generate PDF report
+    lokus --pdf path/to/your/api.yaml
     ```
 
     - Using docker:
@@ -200,6 +205,84 @@ lokus --config security_rules.yaml api.yaml
 ### CI/CD Integration
 
 Check the integration in [this project workflow file.](.github/workflows/lokus.yml)
+
+For more comprehensive CI/CD integration, see our [CI/CD Templates](#cicd-templates) section.
+
+## CI/CD Templates
+
+Lokus provides ready-to-use CI/CD templates for seamless integration into your development workflow. These templates make it easy to add API security and LGPD compliance validation to your GitHub Actions pipelines.
+
+### 🚀 Quick Integration
+
+Copy any template to your `.github/workflows/` directory and customize for your project:
+
+```bash
+# Basic validation on push/PR
+curl -o .github/workflows/lokus-validation.yml \
+  https://raw.githubusercontent.com/geavenx/lokus/main/templates/github-actions/basic/lokus-basic.yml
+
+# PR validation with comments
+curl -o .github/workflows/lokus-pr.yml \
+  https://raw.githubusercontent.com/geavenx/lokus/main/templates/github-actions/basic/lokus-pr.yml
+```
+
+### 📋 Available Templates
+
+| Template | Purpose | Features |
+|----------|---------|----------|
+| **[lokus-basic.yml](templates/github-actions/basic/lokus-basic.yml)** | Simple validation | Push/PR triggers, auto-config creation |
+| **[lokus-pr.yml](templates/github-actions/basic/lokus-pr.yml)** | PR integration | Automated PR comments, change detection |
+| **[lokus-release.yml](templates/github-actions/basic/lokus-release.yml)** | Release gates | Strict validation, report generation |
+| **[lokus-scheduled.yml](templates/github-actions/basic/lokus-scheduled.yml)** | Compliance monitoring | Weekly checks, PDF reports, issue creation |
+
+### ⚙️ Configuration Options
+
+Pre-built configurations for different validation levels:
+
+- **[Basic](templates/configs/basic-config.yaml)**: Essential security checks
+- **[Strict Security](templates/configs/strict-security.yaml)**: Comprehensive validation
+- **[LGPD Focused](templates/configs/lgpd-focused.yaml)**: Brazilian compliance
+- **[Enterprise](templates/configs/enterprise.yaml)**: Complete enterprise validation
+
+### 📖 Full Documentation
+
+For detailed setup instructions, customization options, and troubleshooting:
+
+👉 **[Complete CI/CD Templates Guide](templates/README.md)**
+
+### 🔧 Example Integration
+
+1. **Add a basic workflow**:
+   ```yaml
+   # .github/workflows/api-security.yml
+   name: API Security Validation
+   on: [push, pull_request]
+   
+   jobs:
+     lokus-validation:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - name: Install Lokus
+           run: |
+             pip install uv
+             uv tool install lokus
+         - name: Validate API
+           run: lokus api-spec.yaml
+   ```
+
+2. **Customize for your project**:
+   ```yaml
+   env:
+     SPEC_PATH: "path/to/your/api.yaml"
+     CONFIG_PATH: ".forbidden_keys.yaml"
+   ```
+
+3. **Add configuration** (optional):
+   ```bash
+   curl -o .forbidden_keys.yaml \
+     https://raw.githubusercontent.com/geavenx/lokus/main/templates/configs/basic-config.yaml
+   ```
 
 ## Contributing
 

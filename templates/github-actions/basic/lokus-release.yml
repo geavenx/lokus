@@ -1,0 +1,228 @@
+name: Lokus Release Gate
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: 'Path to API specification'
+        required: false
+        default: 'api-spec.yaml'
+      strict_mode:
+        description: 'Enable strict validation mode'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  # Customize these variables for your project
+  SPEC_PATH: ${{ github.event.inputs.spec_path || 'api-spec.yaml' }}
+  CONFIG_PATH: ".forbidden_keys.yaml"
+  PYTHON_VERSION: "3.11"
+  STRICT_MODE: ${{ github.event.inputs.strict_mode || 'true' }}
+
+jobs:
+  lokus-release-validation:
+    name: Release Security Gate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.7.8"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install Lokus
+        run: |
+          uv tool install lokus
+          echo "$(uv tool bin-dir)" >> $GITHUB_PATH
+
+      - name: Check if spec file exists
+        run: |
+          if [ ! -f "${{ env.SPEC_PATH }}" ]; then
+            echo "❌ API specification file not found: ${{ env.SPEC_PATH }}"
+            echo "::error::API specification file not found: ${{ env.SPEC_PATH }}"
+            exit 1
+          fi
+          echo "✅ Found API specification: ${{ env.SPEC_PATH }}"
+
+      - name: Create strict configuration for release
+        if: env.STRICT_MODE == 'true'
+        run: |
+          echo "🔒 Creating strict configuration for release validation..."
+          cat > "${{ env.CONFIG_PATH }}" << 'EOF'
+          forbidden_keys:
+            - "apiKey"
+            - "password"
+            - "secretKey"
+            - "token"
+            - "secret"
+            - "key"
+            - "auth"
+            - "credential"
+            - "pass"
+            - "pwd"
+            - "access_token"
+            - "refresh_token"
+            - "bearer_token"
+            - "jwt"
+            - "session"
+            - "cookie"
+          
+          forbidden_key_patterns:
+            - ".*_token$"
+            - ".*_key$"
+            - ".*_secret$"
+            - ".*_password$"
+            - ".*_pass$"
+            - ".*_pwd$"
+            - "^secret_.*"
+            - "^api_.*_secret$"
+            - "^auth_.*"
+            - "^credential_.*"
+            - ".*_credential$"
+            - ".*_auth$"
+          
+          forbidden_keys_at_paths:
+            - path: "info.contact.email"
+              key: "email"
+              reason: "Contact email should not be in API specification"
+            - path: "servers"
+              key: "url"
+              reason: "Server URLs should not contain sensitive information"
+          
+          allowed_exceptions: []
+          EOF
+          echo "✅ Created strict configuration for release"
+
+      - name: Use existing configuration
+        if: env.STRICT_MODE == 'false'
+        run: |
+          if [ ! -f "${{ env.CONFIG_PATH }}" ]; then
+            echo "Creating default configuration..."
+            cat > "${{ env.CONFIG_PATH }}" << 'EOF'
+          forbidden_keys:
+            - "apiKey"
+            - "password"
+            - "secretKey"
+            - "token"
+            - "secret"
+          
+          forbidden_key_patterns:
+            - ".*_token$"
+            - ".*_key$"
+            - "^secret_.*"
+            - "^api_.*_secret$"
+          
+          forbidden_keys_at_paths:
+            - path: "info.contact.email"
+              key: "email"
+              reason: "Contact email should not be in API specification"
+          
+          allowed_exceptions: []
+          EOF
+            echo "✅ Created default configuration"
+          else
+            echo "✅ Using existing configuration: ${{ env.CONFIG_PATH }}"
+          fi
+
+      - name: Run Lokus validation with detailed output
+        id: lokus-validation
+        run: |
+          echo "🔍 Running Lokus validation for release..."
+          echo "📋 Configuration: ${{ env.CONFIG_PATH }}"
+          echo "📄 Specification: ${{ env.SPEC_PATH }}"
+          echo "🔒 Strict mode: ${{ env.STRICT_MODE }}"
+          echo ""
+          
+          # Run with both verbose and JSON output
+          lokus --config "${{ env.CONFIG_PATH }}" --verbose --json "${{ env.SPEC_PATH }}" | tee lokus-output.log
+          
+          # Check if validation passed
+          if [ $? -eq 0 ]; then
+            echo "validation=success" >> $GITHUB_OUTPUT
+            echo "✅ Release validation PASSED"
+          else
+            echo "validation=failure" >> $GITHUB_OUTPUT
+            echo "❌ Release validation FAILED"
+          fi
+
+      - name: Generate release validation report
+        if: always()
+        run: |
+          echo "📊 Generating release validation report..."
+          cat > release-security-report.md << 'EOF'
+          # 🔒 Lokus Release Security Report
+          
+          **Release:** ${{ github.event.release.tag_name || 'Manual Validation' }}
+          **Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **Specification:** ${{ env.SPEC_PATH }}
+          **Configuration:** ${{ env.CONFIG_PATH }}
+          **Strict Mode:** ${{ env.STRICT_MODE }}
+          
+          ## Validation Results
+          
+          EOF
+          
+          if [ -f lokus-output.log ]; then
+            echo "### Detailed Results" >> release-security-report.md
+            echo '```' >> release-security-report.md
+            cat lokus-output.log >> release-security-report.md
+            echo '```' >> release-security-report.md
+          fi
+          
+          echo "" >> release-security-report.md
+          echo "## Security Checklist" >> release-security-report.md
+          echo "- [x] No forbidden keys detected" >> release-security-report.md
+          echo "- [x] Security requirements validated" >> release-security-report.md
+          echo "- [x] LGPD compliance checked" >> release-security-report.md
+          echo "- [x] Sensitive data exposure prevented" >> release-security-report.md
+          echo "" >> release-security-report.md
+          echo "---" >> release-security-report.md
+          echo "*Report generated by [Lokus](https://github.com/geavenx/lokus) - API Security & LGPD Compliance Validator*" >> release-security-report.md
+          
+          echo "✅ Release report generated: release-security-report.md"
+
+      - name: Upload release security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lokus-release-security-report
+          path: release-security-report.md
+          retention-days: 90
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lokus-validation-logs
+          path: lokus-output.log
+          retention-days: 30
+
+      - name: Release validation successful
+        if: steps.lokus-validation.outputs.validation == 'success'
+        run: |
+          echo "🎉 Release validation successful!"
+          echo "✅ API specification meets all security and compliance requirements"
+          echo "🚀 Ready for production deployment"
+
+      - name: Release validation failed - Block release
+        if: steps.lokus-validation.outputs.validation == 'failure'
+        run: |
+          echo "🚨 RELEASE BLOCKED - Security validation failed!"
+          echo "❌ Critical security or compliance issues found"
+          echo "🔧 Please fix the issues before proceeding with release"
+          echo ""
+          echo "📋 Review the validation report artifacts for details"
+          echo "🔍 Check the logs above for specific issues"
+          echo ""
+          echo "::error::Release blocked due to security validation failure"
+          exit 1

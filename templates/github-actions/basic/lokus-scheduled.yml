@@ -1,0 +1,297 @@
+name: Lokus Scheduled Compliance Check
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: 'Path to API specification'
+        required: false
+        default: 'api-spec.yaml'
+      generate_pdf:
+        description: 'Generate PDF report'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  # Customize these variables for your project
+  SPEC_PATH: ${{ github.event.inputs.spec_path || 'api-spec.yaml' }}
+  CONFIG_PATH: ".forbidden_keys.yaml"
+  PYTHON_VERSION: "3.11"
+  GENERATE_PDF: ${{ github.event.inputs.generate_pdf || 'true' }}
+
+jobs:
+  lokus-scheduled-check:
+    name: Scheduled Compliance Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.7.8"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install Lokus
+        run: |
+          uv tool install lokus
+          echo "$(uv tool bin-dir)" >> $GITHUB_PATH
+
+      - name: Check if spec file exists
+        run: |
+          if [ ! -f "${{ env.SPEC_PATH }}" ]; then
+            echo "❌ API specification file not found: ${{ env.SPEC_PATH }}"
+            echo "::warning::API specification file not found: ${{ env.SPEC_PATH }}"
+            echo "skip_validation=true" >> $GITHUB_ENV
+          else
+            echo "✅ Found API specification: ${{ env.SPEC_PATH }}"
+            echo "skip_validation=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create monitoring configuration
+        if: env.skip_validation == 'false'
+        run: |
+          if [ ! -f "${{ env.CONFIG_PATH }}" ]; then
+            echo "Creating monitoring configuration..."
+            cat > "${{ env.CONFIG_PATH }}" << 'EOF'
+          forbidden_keys:
+            - "apiKey"
+            - "password"
+            - "secretKey"
+            - "token"
+            - "secret"
+            - "key"
+            - "auth"
+            - "credential"
+          
+          forbidden_key_patterns:
+            - ".*_token$"
+            - ".*_key$"
+            - ".*_secret$"
+            - ".*_password$"
+            - "^secret_.*"
+            - "^api_.*_secret$"
+            - "^auth_.*"
+            - ".*_credential$"
+          
+          forbidden_keys_at_paths:
+            - path: "info.contact.email"
+              key: "email"
+              reason: "Contact email should not be in API specification"
+            - path: "servers"
+              key: "url"
+              reason: "Server URLs should not contain sensitive information"
+          
+          allowed_exceptions: []
+          EOF
+            echo "✅ Created monitoring configuration"
+          else
+            echo "✅ Using existing configuration: ${{ env.CONFIG_PATH }}"
+          fi
+
+      - name: Run Lokus compliance check
+        if: env.skip_validation == 'false'
+        id: lokus-check
+        run: |
+          echo "🔍 Running scheduled compliance check..."
+          echo "📅 Check date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "📄 Specification: ${{ env.SPEC_PATH }}"
+          echo ""
+          
+          # Run with verbose and JSON output
+          set +e  # Don't exit on error
+          lokus --config "${{ env.CONFIG_PATH }}" --verbose --json "${{ env.SPEC_PATH }}" > lokus-results.json 2>&1
+          exit_code=$?
+          set -e
+          
+          if [ $exit_code -eq 0 ]; then
+            echo "validation=success" >> $GITHUB_OUTPUT
+            echo "✅ Compliance check PASSED"
+          else
+            echo "validation=failure" >> $GITHUB_OUTPUT
+            echo "❌ Compliance check FAILED"
+          fi
+          
+          # Store results for reporting
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          cat lokus-results.json
+
+      - name: Generate PDF report
+        if: env.skip_validation == 'false' && env.GENERATE_PDF == 'true'
+        run: |
+          echo "📄 Generating PDF compliance report..."
+          lokus --config "${{ env.CONFIG_PATH }}" --pdf "${{ env.SPEC_PATH }}" || true
+          
+          # Rename PDF with timestamp
+          if ls lokus_report-*.pdf 1> /dev/null 2>&1; then
+            timestamp=$(date -u '+%Y%m%d_%H%M%S')
+            mv lokus_report-*.pdf "lokus_compliance_report_${timestamp}.pdf"
+            echo "✅ PDF report generated: lokus_compliance_report_${timestamp}.pdf"
+            echo "pdf_generated=true" >> $GITHUB_ENV
+            echo "pdf_filename=lokus_compliance_report_${timestamp}.pdf" >> $GITHUB_ENV
+          else
+            echo "⚠️  PDF report generation skipped or failed"
+            echo "pdf_generated=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create compliance summary
+        if: env.skip_validation == 'false'
+        run: |
+          timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          echo "📊 Creating compliance summary..."
+          
+          cat > compliance-summary.md << 'EOF'
+          # 📋 Lokus Compliance Monitoring Report
+          
+          **Report Date:** $timestamp
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+          **Specification:** ${{ env.SPEC_PATH }}
+          **Configuration:** ${{ env.CONFIG_PATH }}
+          
+          ## Status
+          
+          EOF
+          
+          if [ "${{ steps.lokus-check.outputs.validation }}" == "success" ]; then
+            echo "✅ **COMPLIANT** - No security or compliance issues found" >> compliance-summary.md
+          else
+            echo "❌ **NON-COMPLIANT** - Issues found requiring attention" >> compliance-summary.md
+          fi
+          
+          echo "" >> compliance-summary.md
+          echo "## Validation Details" >> compliance-summary.md
+          echo '```json' >> compliance-summary.md
+          cat lokus-results.json >> compliance-summary.md
+          echo '```' >> compliance-summary.md
+          
+          echo "" >> compliance-summary.md
+          echo "## Next Steps" >> compliance-summary.md
+          if [ "${{ steps.lokus-check.outputs.validation }}" == "success" ]; then
+            echo "- ✅ Continue regular monitoring" >> compliance-summary.md
+            echo "- 📈 Review compliance trends" >> compliance-summary.md
+            echo "- 🔄 Keep security practices up to date" >> compliance-summary.md
+          else
+            echo "- 🔧 Review and fix identified issues" >> compliance-summary.md
+            echo "- 📝 Update API specification" >> compliance-summary.md
+            echo "- 🔄 Re-run validation after fixes" >> compliance-summary.md
+            echo "- 📞 Contact security team if needed" >> compliance-summary.md
+          fi
+          
+          echo "" >> compliance-summary.md
+          echo "---" >> compliance-summary.md
+          echo "*Report generated by [Lokus](https://github.com/geavenx/lokus) - API Security & LGPD Compliance Validator*" >> compliance-summary.md
+          
+          echo "✅ Compliance summary created"
+
+      - name: Upload compliance report
+        if: env.skip_validation == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lokus-compliance-report-${{ github.run_number }}
+          path: |
+            compliance-summary.md
+            lokus-results.json
+            lokus_compliance_report_*.pdf
+          retention-days: 90
+
+      - name: Create issue for compliance failures
+        if: env.skip_validation == 'false' && steps.lokus-check.outputs.validation == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const timestamp = new Date().toISOString().split('T')[0];
+            
+            // Read compliance summary
+            let summary = "Compliance check failed. Please review the workflow logs.";
+            try {
+              if (fs.existsSync('compliance-summary.md')) {
+                summary = fs.readFileSync('compliance-summary.md', 'utf8');
+              }
+            } catch (error) {
+              console.log('Error reading compliance summary:', error);
+            }
+            
+            const issueTitle = `🚨 API Compliance Check Failed - ${timestamp}`;
+            const issueBody = `# 🚨 Automated Compliance Check Failed
+            
+            Our scheduled API security and compliance check has detected issues that require attention.
+            
+            **Details:**
+            - **Repository:** ${{ github.repository }}
+            - **Branch:** ${{ github.ref_name }}
+            - **Check Date:** ${timestamp}
+            - **Workflow Run:** ${{ github.run_number }}
+            
+            ## Compliance Report
+            
+            ${summary}
+            
+            ## Action Required
+            
+            Please:
+            1. Review the compliance report artifact
+            2. Fix the identified issues
+            3. Re-run the validation
+            4. Close this issue when resolved
+            
+            ## Workflow Details
+            
+            - **Workflow:** ${{ github.workflow }}
+            - **Run ID:** ${{ github.run_id }}
+            - **Triggered by:** Scheduled check
+            
+            ---
+            
+            *This issue was automatically created by the Lokus compliance monitoring workflow.*
+            *Please do not delete this issue until the compliance problems are resolved.*`;
+            
+            // Check if similar issue already exists
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['compliance', 'security', 'automated']
+            });
+            
+            const hasExistingIssue = existingIssues.data.some(issue => 
+              issue.title.includes('API Compliance Check Failed')
+            );
+            
+            if (!hasExistingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['compliance', 'security', 'automated', 'high-priority']
+              });
+              console.log('Created compliance issue');
+            } else {
+              console.log('Compliance issue already exists, skipping creation');
+            }
+
+      - name: Compliance check completed successfully
+        if: env.skip_validation == 'false' && steps.lokus-check.outputs.validation == 'success'
+        run: |
+          echo "🎉 Scheduled compliance check completed successfully!"
+          echo "✅ No security or compliance issues found"
+          echo "📊 Compliance report generated and stored as artifact"
+          echo "📅 Next scheduled check: $(date -d 'next Monday 9:00 UTC' -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Compliance check skipped
+        if: env.skip_validation == 'true'
+        run: |
+          echo "⏭️  Compliance check skipped - API specification not found"
+          echo "📄 Expected file: ${{ env.SPEC_PATH }}"
+          echo "💡 Add your API specification file to enable automated compliance monitoring"

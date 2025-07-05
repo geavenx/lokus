@@ -1,0 +1,179 @@
+# LGPD-Focused Configuration
+# This configuration emphasizes Brazilian data protection law compliance
+
+forbidden_keys:
+  # Personal identification
+  - "cpf"
+  - "cnpj"
+  - "rg"
+  - "passport"
+  - "driver_license"
+  - "social_security"
+  
+  # Contact information
+  - "email"
+  - "phone"
+  - "telefone"
+  - "celular"
+  - "whatsapp"
+  - "address"
+  - "endereco"
+  
+  # Biometric and health data
+  - "fingerprint"
+  - "digital"
+  - "biometric"
+  - "biometrico"
+  - "health"
+  - "saude"
+  - "medical"
+  - "medico"
+  
+  # Financial information
+  - "credit_card"
+  - "cartao_credito"
+  - "bank_account"
+  - "conta_bancaria"
+  - "pix"
+  - "salary"
+  - "salario"
+  - "income"
+  - "renda"
+  
+  # Sensitive personal data
+  - "birth_date"
+  - "data_nascimento"
+  - "age"
+  - "idade"
+  - "gender"
+  - "sexo"
+  - "genero"
+  - "race"
+  - "raca"
+  - "religion"
+  - "religiao"
+  - "political_opinion"
+  - "opiniao_politica"
+
+forbidden_key_patterns:
+  # CPF patterns (Brazilian tax ID)
+  - ".*cpf.*"
+  - ".*_cpf$"
+  - "^cpf_.*"
+  
+  # CNPJ patterns (Brazilian company ID)
+  - ".*cnpj.*"
+  - ".*_cnpj$"
+  - "^cnpj_.*"
+  
+  # RG patterns (Brazilian ID)
+  - ".*rg.*"
+  - ".*_rg$"
+  - "^rg_.*"
+  
+  # Email patterns
+  - ".*email.*"
+  - ".*_email$"
+  - "^email_.*"
+  
+  # Phone patterns
+  - ".*phone.*"
+  - ".*telefone.*"
+  - ".*celular.*"
+  - ".*_phone$"
+  - ".*_telefone$"
+  
+  # Address patterns
+  - ".*address.*"
+  - ".*endereco.*"
+  - ".*_address$"
+  - ".*_endereco$"
+  
+  # Personal data patterns
+  - ".*personal.*"
+  - ".*pessoal.*"
+  - ".*private.*"
+  - ".*privado.*"
+  - ".*sensitive.*"
+  - ".*sensivel.*"
+  
+  # Health patterns
+  - ".*health.*"
+  - ".*saude.*"
+  - ".*medical.*"
+  - ".*medico.*"
+  
+  # Financial patterns
+  - ".*financial.*"
+  - ".*financeiro.*"
+  - ".*bank.*"
+  - ".*banco.*"
+  - ".*credit.*"
+  - ".*credito.*"
+
+forbidden_keys_at_paths:
+  # User registration/profile paths
+  - path: "paths./users.post.requestBody"
+    key: "cpf"
+    reason: "CPF should not be required in user registration without explicit consent"
+  
+  - path: "paths./users.post.requestBody"
+    key: "email"
+    reason: "Email collection must have clear purpose and consent"
+  
+  - path: "paths./users.post.requestBody"
+    key: "phone"
+    reason: "Phone collection must have clear purpose and consent"
+  
+  # Response examples
+  - path: "components.examples"
+    key: "cpf"
+    reason: "Real CPF numbers should never appear in examples"
+  
+  - path: "components.examples"
+    key: "email"
+    reason: "Real email addresses should never appear in examples"
+  
+  - path: "components.examples"
+    key: "phone"
+    reason: "Real phone numbers should never appear in examples"
+  
+  # Schema examples
+  - path: "components.schemas"
+    key: "example"
+    reason: "Schema examples should not contain real personal data"
+  
+  # Path parameters
+  - path: "paths"
+    key: "cpf"
+    reason: "CPF should not be used as path parameter (use UUID instead)"
+  
+  - path: "paths"
+    key: "email"
+    reason: "Email should not be used as path parameter (use UUID instead)"
+
+allowed_exceptions:
+  # Allow legitimate use cases with proper context
+  - key: "email"
+    path_prefix: "components.schemas.ContactInfo"
+    reason: "Contact information schema for business purposes"
+  
+  - key: "phone"
+    path_prefix: "components.schemas.ContactInfo"
+    reason: "Contact information schema for business purposes"
+  
+  - key: "email_verified"
+    path_prefix: "components.schemas"
+    reason: "Email verification status is allowed"
+  
+  - key: "phone_verified"
+    path_prefix: "components.schemas"
+    reason: "Phone verification status is allowed"
+  
+  - key: "consent"
+    path_prefix: "components.schemas"
+    reason: "Consent-related fields are required for LGPD compliance"
+  
+  - key: "data_processing_consent"
+    path_prefix: "components.schemas"
+    reason: "Data processing consent is required for LGPD compliance"

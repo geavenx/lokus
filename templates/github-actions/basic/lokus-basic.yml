@@ -1,0 +1,106 @@
+name: Lokus API Security Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.yaml'
+      - '**.yml'
+      - '**.json'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**.yaml'
+      - '**.yml'
+      - '**.json'
+
+env:
+  # Customize these variables for your project
+  SPEC_PATH: "api-spec.yaml"  # Path to your API specification
+  CONFIG_PATH: ".forbidden_keys.yaml"  # Path to your Lokus configuration
+  PYTHON_VERSION: "3.11"  # Python version to use
+
+jobs:
+  lokus-validation:
+    name: API Security & LGPD Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.7.8"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install Lokus
+        run: |
+          uv tool install lokus
+          echo "$(uv tool bin-dir)" >> $GITHUB_PATH
+
+      - name: Check if spec file exists
+        run: |
+          if [ ! -f "${{ env.SPEC_PATH }}" ]; then
+            echo "❌ API specification file not found: ${{ env.SPEC_PATH }}"
+            echo "Please update the SPEC_PATH environment variable in this workflow"
+            exit 1
+          fi
+          echo "✅ Found API specification: ${{ env.SPEC_PATH }}"
+
+      - name: Create default config if not exists
+        run: |
+          if [ ! -f "${{ env.CONFIG_PATH }}" ]; then
+            echo "Creating default Lokus configuration..."
+            cat > "${{ env.CONFIG_PATH }}" << 'EOF'
+          forbidden_keys:
+            - "apiKey"
+            - "password"
+            - "secretKey"
+            - "token"
+            - "secret"
+          
+          forbidden_key_patterns:
+            - ".*_token$"
+            - ".*_key$"
+            - "^secret_.*"
+            - "^api_.*_secret$"
+          
+          forbidden_keys_at_paths:
+            - path: "info.contact.email"
+              key: "email"
+              reason: "Contact email should not be in API specification"
+          
+          allowed_exceptions: []
+          EOF
+            echo "✅ Created default configuration: ${{ env.CONFIG_PATH }}"
+          else
+            echo "✅ Using existing configuration: ${{ env.CONFIG_PATH }}"
+          fi
+
+      - name: Run Lokus validation
+        run: |
+          echo "🔍 Running Lokus validation on ${{ env.SPEC_PATH }}"
+          lokus --config "${{ env.CONFIG_PATH }}" --verbose "${{ env.SPEC_PATH }}"
+
+      - name: Validation completed
+        if: success()
+        run: |
+          echo "✅ Lokus validation completed successfully!"
+          echo "No security issues or LGPD compliance problems found."
+
+      - name: Validation failed
+        if: failure()
+        run: |
+          echo "❌ Lokus validation failed!"
+          echo "Please review the issues above and fix them before merging."
+          echo ""
+          echo "Common solutions:"
+          echo "1. Remove forbidden keys from your API specification"
+          echo "2. Update your Lokus configuration to allow specific exceptions"
+          echo "3. Add proper security requirements to your endpoints"
+          echo "4. Ensure LGPD compliance for data handling"

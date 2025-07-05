@@ -1,0 +1,27 @@
+# Basic Lokus Configuration
+# This configuration provides essential security checks for API specifications
+
+forbidden_keys:
+  # Common sensitive keys that should not appear in API specs
+  - "apiKey"
+  - "password"
+  - "secretKey"
+  - "token"
+  - "secret"
+
+forbidden_key_patterns:
+  # Regex patterns for forbidden key naming conventions
+  - ".*_token$"        # Keys ending with "_token"
+  - ".*_key$"          # Keys ending with "_key"
+  - "^secret_.*"       # Keys starting with "secret_"
+  - "^api_.*_secret$"  # Keys like "api_user_secret"
+
+forbidden_keys_at_paths:
+  # Path-specific forbidden keys
+  - path: "info.contact.email"
+    key: "email"
+    reason: "Contact email should not be exposed in API specification"
+
+allowed_exceptions:
+  # Exceptions to the rules above (currently none)
+  []
