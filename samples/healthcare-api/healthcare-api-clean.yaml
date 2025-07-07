@@ -1,0 +1,689 @@
+openapi: 3.0.3
+info:
+  title: SecureHealth Digital Platform API
+  version: "3.2.0"
+  description: |
+    A secure digital health platform API designed with privacy-first principles
+    and strict compliance with healthcare regulations and LGPD requirements.
+    This API enables secure management of patient data, medical records, and
+    healthcare provider interactions.
+    
+    **Security Features:**
+    - OAuth2 authentication with healthcare-specific scopes
+    - End-to-end encryption for medical data
+    - Comprehensive audit logging
+    - Multi-factor authentication support
+    - Role-based access control
+    
+    **Privacy Compliance:**
+    - LGPD compliant patient data handling
+    - Minimal data collection principle
+    - Explicit consent management
+    - Data retention policies
+    - Right to be forgotten implementation
+    
+    **Healthcare Compliance:**
+    - Medical data anonymization
+    - Secure prescription handling
+    - Provider credentialing integration
+    - Insurance data protection
+    
+  contact:
+    name: SecureHealth API Support
+    email: api-support@securehealth.com.br
+    url: https://developer.securehealth.com.br
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.securehealth.com.br/v3
+    description: Production server
+  - url: https://api-sandbox.securehealth.com.br/v3
+    description: Sandbox server for testing
+
+security:
+  - OAuth2:
+      - read:patient
+      - write:patient
+      - read:medical-records
+      - write:medical-records
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.securehealth.com.br/oauth/authorize
+          tokenUrl: https://auth.securehealth.com.br/oauth/token
+          scopes:
+            read:patient: Read patient information
+            write:patient: Create and update patient data
+            read:medical-records: Access medical records
+            write:medical-records: Create and update medical records
+            read:appointments: View appointment schedules
+            write:appointments: Schedule and manage appointments
+            read:prescriptions: View prescription data
+            write:prescriptions: Create and manage prescriptions
+            read:insurance: Access insurance information
+            provider:access: Healthcare provider access
+
+  schemas:
+    Patient:
+      type: object
+      required:
+        - patientId
+        - fullName
+        - dateOfBirth
+        - contactEmail
+        - emergencyContact
+      properties:
+        patientId:
+          type: string
+          format: uuid
+          description: Unique patient identifier (UUID format to protect privacy)
+          example: "p1a2b3c4-d5e6-7890-abcd-123456789012"
+        fullName:
+          type: string
+          description: Patient's full legal name (required for medical record accuracy and identification)
+          example: "Ana Silva Santos"
+        dateOfBirth:
+          type: string
+          format: date
+          description: Patient's date of birth (required for age-based medical protocols and identity verification)
+          example: "1990-03-15"
+        contactEmail:
+          type: string
+          format: email
+          description: Patient's email address (used for appointment reminders and secure communication)
+          example: "patient@example.com"
+        phoneNumber:
+          type: string
+          pattern: "^\\+55\\d{10,11}$"
+          description: Brazilian phone number (required for emergency contact and appointment confirmations)
+          example: "+5511000000000"
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+        address:
+          $ref: '#/components/schemas/Address'
+        insuranceInfo:
+          $ref: '#/components/schemas/InsuranceInfo'
+
+    EmergencyContact:
+      type: object
+      required:
+        - name
+        - relationship
+        - phoneNumber
+      properties:
+        name:
+          type: string
+          description: Emergency contact's full name (required for emergency medical situations)
+          example: "Carlos Silva"
+        relationship:
+          type: string
+          description: Relationship to patient (required for legal consent and emergency decision-making)
+          example: "spouse"
+        phoneNumber:
+          type: string
+          pattern: "^\\+55\\d{10,11}$"
+          description: Emergency contact phone number (required for immediate emergency communication)
+          example: "+5511000000001"
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+      properties:
+        street:
+          type: string
+          description: Street address (required for home healthcare services and emergency response)
+          example: "Rua das Saúde, 100"
+        city:
+          type: string
+          description: City name (required for regional healthcare provider assignment)
+          example: "São Paulo"
+        state:
+          type: string
+          description: State abbreviation (required for healthcare jurisdiction and insurance coverage)
+          example: "SP"
+        postalCode:
+          type: string
+          pattern: "^\\d{5}-?\\d{3}$"
+          description: Brazilian postal code (required for healthcare delivery services)
+          example: "12345-678"
+
+    InsuranceInfo:
+      type: object
+      required:
+        - providerId
+        - policyNumber
+        - coverageType
+      properties:
+        providerId:
+          type: string
+          format: uuid
+          description: Insurance provider identifier (UUID format for privacy protection)
+          example: "i1b2c3d4-e5f6-7890-ghij-klmnopqrstuv"
+        policyNumber:
+          type: string
+          description: Insurance policy number (required for healthcare billing and coverage verification)
+          example: "POL-2024-001234"
+        coverageType:
+          type: string
+          enum: [basic, premium, family, corporate]
+          description: Insurance coverage level (required for treatment authorization and billing)
+          example: "premium"
+        validUntil:
+          type: string
+          format: date
+          description: Insurance policy expiration date (required for coverage validation)
+          example: "2024-12-31"
+
+    MedicalRecord:
+      type: object
+      required:
+        - recordId
+        - patientId
+        - providerId
+        - recordType
+        - recordDate
+        - summary
+      properties:
+        recordId:
+          type: string
+          format: uuid
+          description: Unique medical record identifier (UUID format for privacy)
+          example: "m1a2b3c4-d5e6-7890-abcd-fedcba098765"
+        patientId:
+          type: string
+          format: uuid
+          description: Associated patient identifier
+          example: "p1a2b3c4-d5e6-7890-abcd-123456789012"
+        providerId:
+          type: string
+          format: uuid
+          description: Healthcare provider identifier
+          example: "d1a2b3c4-e5f6-7890-abcd-provider12345"
+        recordType:
+          type: string
+          enum: [consultation, diagnosis, treatment, prescription, test_result]
+          description: Type of medical record (required for medical record organization)
+          example: "consultation"
+        recordDate:
+          type: string
+          format: date-time
+          description: Date and time of medical record creation
+          example: "2024-01-15T14:30:00Z"
+        summary:
+          type: string
+          description: Medical record summary (required for healthcare continuity and provider communication)
+          example: "Routine consultation - patient in good health"
+        diagnosis:
+          type: string
+          description: Medical diagnosis (required for treatment planning and insurance billing)
+          example: "Routine health check - no issues found"
+        treatment:
+          type: string
+          description: Prescribed treatment (required for medical care coordination)
+          example: "Continue current exercise routine"
+
+    Appointment:
+      type: object
+      required:
+        - appointmentId
+        - patientId
+        - providerId
+        - appointmentDate
+        - appointmentType
+        - status
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+          description: Unique appointment identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-appointment123"
+        patientId:
+          type: string
+          format: uuid
+          description: Patient identifier
+          example: "p1a2b3c4-d5e6-7890-abcd-123456789012"
+        providerId:
+          type: string
+          format: uuid
+          description: Healthcare provider identifier
+          example: "d1a2b3c4-e5f6-7890-abcd-provider12345"
+        appointmentDate:
+          type: string
+          format: date-time
+          description: Scheduled appointment date and time
+          example: "2024-02-01T10:00:00Z"
+        appointmentType:
+          type: string
+          enum: [consultation, followup, emergency, routine, specialist]
+          description: Type of appointment (required for scheduling and resource allocation)
+          example: "consultation"
+        status:
+          type: string
+          enum: [scheduled, confirmed, cancelled, completed, no_show]
+          description: Current appointment status
+          example: "scheduled"
+        notes:
+          type: string
+          description: Appointment notes (used for preparation and special requirements)
+          example: "Routine checkup - patient requested morning slot"
+
+    Prescription:
+      type: object
+      required:
+        - prescriptionId
+        - patientId
+        - providerId
+        - medicationName
+        - dosage
+        - frequency
+        - duration
+        - prescriptionDate
+      properties:
+        prescriptionId:
+          type: string
+          format: uuid
+          description: Unique prescription identifier
+          example: "r1x2y3z4-a5b6-7890-cdef-prescription123"
+        patientId:
+          type: string
+          format: uuid
+          description: Patient identifier
+          example: "p1a2b3c4-d5e6-7890-abcd-123456789012"
+        providerId:
+          type: string
+          format: uuid
+          description: Prescribing healthcare provider identifier
+          example: "d1a2b3c4-e5f6-7890-abcd-provider12345"
+        medicationName:
+          type: string
+          description: Name of prescribed medication (required for pharmacy fulfillment)
+          example: "Paracetamol"
+        dosage:
+          type: string
+          description: Medication dosage (required for safe medication administration)
+          example: "500mg"
+        frequency:
+          type: string
+          description: Frequency of medication intake (required for proper treatment)
+          example: "twice daily"
+        duration:
+          type: string
+          description: Duration of treatment (required for medication management)
+          example: "7 days"
+        prescriptionDate:
+          type: string
+          format: date-time
+          description: Date prescription was issued
+          example: "2024-01-15T14:30:00Z"
+        instructions:
+          type: string
+          description: Special instructions for medication (required for safe administration)
+          example: "Take with food"
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate healthcare user
+      description: |
+        Authenticate healthcare users (patients, providers, staff) and obtain access token.
+        This endpoint implements multi-factor authentication and strict rate limiting
+        to protect against unauthorized access to medical data.
+      operationId: authenticateUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User's login identifier
+                  example: "healthuser123"
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: "********"
+                userType:
+                  type: string
+                  enum: [patient, provider, staff]
+                  description: Type of user account
+                  example: "patient"
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token for API authentication
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    description: Token expiration time in seconds
+                    example: 3600
+                  scope:
+                    type: string
+                    description: Granted permissions scope
+                    example: "read:patient write:patient"
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Too many authentication attempts
+
+  /patients:
+    post:
+      summary: Register new patient
+      description: |
+        Register a new patient in the healthcare system.
+        This endpoint collects essential patient information required for
+        healthcare delivery while minimizing data collection per LGPD principles.
+      operationId: registerPatient
+      tags:
+        - Patients
+      security:
+        - OAuth2:
+            - write:patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+      responses:
+        '201':
+          description: Patient registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '400':
+          description: Invalid patient data
+        '401':
+          description: Unauthorized access
+        '422':
+          description: Patient validation failed
+
+  /patients/{patientId}:
+    get:
+      summary: Get patient information
+      description: |
+        Retrieve patient information by ID.
+        This endpoint requires proper authentication and authorization.
+        Access is restricted to the patient themselves, their healthcare providers,
+        and authorized staff members.
+      operationId: getPatient
+      tags:
+        - Patients
+      security:
+        - OAuth2:
+            - read:patient
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient unique identifier (UUID format)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Patient information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Patient not found
+
+  /patients/{patientId}/medical-records:
+    get:
+      summary: Get patient medical records
+      description: |
+        Retrieve medical records for a specific patient.
+        This endpoint handles highly sensitive medical data and requires
+        strict authentication, authorization, and audit logging.
+      operationId: getPatientMedicalRecords
+      tags:
+        - Medical Records
+      security:
+        - OAuth2:
+            - read:medical-records
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient unique identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Medical records retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicalRecord'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Patient not found
+
+    post:
+      summary: Create medical record
+      description: |
+        Create a new medical record for a patient.
+        This endpoint is restricted to healthcare providers and requires
+        proper medical licensing verification.
+      operationId: createMedicalRecord
+      tags:
+        - Medical Records
+      security:
+        - OAuth2:
+            - write:medical-records
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient unique identifier
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+      responses:
+        '201':
+          description: Medical record created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+        '400':
+          description: Invalid medical record data
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+
+  /appointments:
+    post:
+      summary: Schedule appointment
+      description: |
+        Schedule a new appointment between patient and healthcare provider.
+        This endpoint coordinates healthcare scheduling while protecting
+        patient privacy and provider availability.
+      operationId: scheduleAppointment
+      tags:
+        - Appointments
+      security:
+        - OAuth2:
+            - write:appointments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '201':
+          description: Appointment scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Invalid appointment data
+        '401':
+          description: Unauthorized access
+        '409':
+          description: Appointment time conflict
+
+  /appointments/{appointmentId}:
+    get:
+      summary: Get appointment details
+      description: |
+        Retrieve details of a specific appointment.
+        Access is restricted to the involved patient, healthcare provider,
+        and authorized staff members.
+      operationId: getAppointment
+      tags:
+        - Appointments
+      security:
+        - OAuth2:
+            - read:appointments
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: Appointment unique identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Appointment details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Appointment not found
+
+  /prescriptions:
+    post:
+      summary: Create prescription
+      description: |
+        Create a new prescription for a patient.
+        This endpoint is restricted to licensed healthcare providers and
+        implements controlled substance monitoring.
+      operationId: createPrescription
+      tags:
+        - Prescriptions
+      security:
+        - OAuth2:
+            - write:prescriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+      responses:
+        '201':
+          description: Prescription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '400':
+          description: Invalid prescription data
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+
+  /patients/{patientId}/prescriptions:
+    get:
+      summary: Get patient prescriptions
+      description: |
+        Retrieve all prescriptions for a specific patient.
+        This endpoint provides access to current and historical prescriptions
+        for medication management and healthcare coordination.
+      operationId: getPatientPrescriptions
+      tags:
+        - Prescriptions
+      security:
+        - OAuth2:
+            - read:prescriptions
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient unique identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Patient prescriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prescription'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Patient not found
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Patients
+    description: Patient registration and profile management
+  - name: Medical Records
+    description: Medical record management and access
+  - name: Appointments
+    description: Appointment scheduling and management
+  - name: Prescriptions
+    description: Prescription creation and management

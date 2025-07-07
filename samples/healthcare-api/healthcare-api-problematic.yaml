@@ -1,0 +1,783 @@
+openapi: 3.0.3
+info:
+  title: UnsafeHealth Digital Platform API
+  version: "3.2.0"
+  description: |
+    A digital health platform API with multiple security vulnerabilities
+    and LGPD compliance violations. This API demonstrates common mistakes
+    in healthcare API design that expose sensitive medical data.
+    
+    WARNING: This API specification contains sensitive information
+    and should not be used in production environments.
+    
+  contact:
+    name: UnsafeHealth API Support
+    email: admin@unsafehealth.com.br
+    url: https://developer.unsafehealth.com.br
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.unsafehealth.com.br/v3
+    description: Production server
+  - url: https://api-sandbox.unsafehealth.com.br/v3
+    description: Sandbox server for testing
+
+security:
+  - ApiKeyAuth: []
+  - MedicalAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for basic authentication
+    MedicalAuth:
+      type: apiKey
+      in: header
+      name: medical_record_token
+      description: Medical record access token
+    AdminAuth:
+      type: apiKey
+      in: header
+      name: admin_secret_key
+      description: Admin secret key for privileged access
+    DatabaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Database access token
+
+  schemas:
+    Patient:
+      type: object
+      required:
+        - patientId
+        - fullName
+        - dateOfBirth
+        - email
+        - cpf
+      properties:
+        patientId:
+          type: integer
+          description: Direct patient ID (sequential number)
+          example: 123456
+        fullName:
+          type: string
+          example: "Maria Santos Silva"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1990-03-15"
+        email:
+          type: string
+          format: email
+          example: "maria.santos@gmail.com"
+        phone:
+          type: string
+          example: "+5511987654321"
+        cpf:
+          type: string
+          description: Patient CPF number
+          example: "123.456.789-00"
+        rg:
+          type: string
+          description: Patient RG number
+          example: "12.345.678-9"
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+        address:
+          $ref: '#/components/schemas/Address'
+        insuranceInfo:
+          $ref: '#/components/schemas/InsuranceInfo'
+        internal_medical_id:
+          type: string
+          description: Internal medical system ID
+          example: "MED_ID_789123"
+        admin_notes:
+          type: string
+          description: Internal admin notes about patient
+          example: "High-risk patient, requires special attention"
+
+    EmergencyContact:
+      type: object
+      required:
+        - name
+        - relationship
+        - phone
+        - cpf
+      properties:
+        name:
+          type: string
+          example: "Carlos Silva Santos"
+        relationship:
+          type: string
+          example: "spouse"
+        phone:
+          type: string
+          example: "+5511987654322"
+        cpf:
+          type: string
+          description: Emergency contact CPF
+          example: "987.654.321-00"
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+      properties:
+        street:
+          type: string
+          example: "Rua das Saúde, 100"
+        city:
+          type: string
+          example: "São Paulo"
+        state:
+          type: string
+          example: "SP"
+        postalCode:
+          type: string
+          pattern: "^\\d{5}-?\\d{3}$"
+          example: "12345-678"
+
+    InsuranceInfo:
+      type: object
+      required:
+        - providerId
+        - policyNumber
+        - coverageType
+      properties:
+        providerId:
+          type: integer
+          description: Direct insurance provider ID
+          example: 567890
+        policyNumber:
+          type: string
+          example: "POL-2024-001234"
+        coverageType:
+          type: string
+          enum: [basic, premium, family, corporate]
+          example: "premium"
+        validUntil:
+          type: string
+          format: date
+          example: "2024-12-31"
+        insurance_secret_key:
+          type: string
+          description: Insurance verification secret
+          example: "ins_secret_abc123"
+
+    MedicalRecord:
+      type: object
+      required:
+        - recordId
+        - patientId
+        - providerId
+        - recordType
+        - recordDate
+      properties:
+        recordId:
+          type: integer
+          description: Sequential medical record ID
+          example: 789123
+        patientId:
+          type: integer
+          example: 123456
+        providerId:
+          type: integer
+          description: Provider ID
+          example: 456789
+        recordType:
+          type: string
+          enum: [consultation, diagnosis, treatment, prescription, test_result]
+          example: "consultation"
+        recordDate:
+          type: string
+          format: date-time
+          example: "2024-01-15T14:30:00Z"
+        summary:
+          type: string
+        diagnosis:
+          type: string
+          example: "Hypertension, Type 2 Diabetes"
+        treatment:
+          type: string
+          example: "Prescribed Metformin 500mg twice daily"
+        medical_access_token:
+          type: string
+          description: Medical record access token
+          example: "med_token_xyz789"
+        internal_notes:
+          type: string
+          description: Internal provider notes
+          example: "Patient shows signs of medication non-compliance"
+
+    Appointment:
+      type: object
+      required:
+        - appointmentId
+        - patientId
+        - providerId
+        - appointmentDate
+        - appointmentType
+      properties:
+        appointmentId:
+          type: integer
+          description: Sequential appointment ID
+          example: 345678
+        patientId:
+          type: integer
+          example: 123456
+        providerId:
+          type: integer
+          example: 456789
+        appointmentDate:
+          type: string
+          format: date-time
+          example: "2024-02-01T10:00:00Z"
+        appointmentType:
+          type: string
+          enum: [consultation, followup, emergency, routine, specialist]
+          example: "consultation"
+        status:
+          type: string
+          enum: [scheduled, confirmed, cancelled, completed, no_show]
+          example: "scheduled"
+        notes:
+          type: string
+        scheduler_token:
+          type: string
+          description: Appointment scheduling token
+          example: "sched_token_abc123"
+
+    Prescription:
+      type: object
+      required:
+        - prescriptionId
+        - patientId
+        - providerId
+        - medicationName
+        - dosage
+        - frequency
+        - duration
+        - prescriptionDate
+      properties:
+        prescriptionId:
+          type: integer
+          description: Sequential prescription ID
+          example: 567890
+        patientId:
+          type: integer
+          example: 123456
+        providerId:
+          type: integer
+          example: 456789
+        medicationName:
+          type: string
+          example: "Metformin"
+        dosage:
+          type: string
+          example: "500mg"
+        frequency:
+          type: string
+          example: "twice daily"
+        duration:
+          type: string
+          example: "30 days"
+        prescriptionDate:
+          type: string
+          format: date-time
+          example: "2024-01-15T14:30:00Z"
+        instructions:
+          type: string
+          example: "Take with food"
+        pharmacy_access_key:
+          type: string
+          description: Pharmacy access key for fulfillment
+          example: "pharm_key_xyz789"
+        controlled_substance_token:
+          type: string
+          description: Controlled substance verification token
+          example: "controlled_token_abc123"
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate healthcare user
+      description: User authentication endpoint
+      operationId: authenticateUser
+      tags:
+        - Authentication
+      parameters:
+        - name: apiKey
+          in: header
+          required: true
+          description: API key for authentication
+          schema:
+            type: string
+            example: "api_key_12345"
+        - name: secretKey
+          in: header
+          required: true
+          description: Secret key for additional security
+          schema:
+            type: string
+            example: "secret_key_67890"
+        - name: medical_admin_token
+          in: header
+          required: false
+          description: Medical admin token for privileged access
+          schema:
+            type: string
+            example: "med_admin_token_xyz789"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "doctor123"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                userType:
+                  type: string
+                  enum: [patient, provider, staff]
+                  example: "provider"
+                database_key:
+                  type: string
+                  description: Database access key
+                  example: "db_key_secret_123"
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    example: 3600
+                  medical_record_token:
+                    type: string
+                    description: Medical record access token
+                    example: "med_rec_token_abc123"
+                  admin_privileges:
+                    type: boolean
+                    description: Whether user has admin access
+                    example: true
+              examples:
+                doctor_login:
+                  summary: Doctor login response with sensitive tokens
+                  value:
+                    access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    token_type: "Bearer"
+                    expires_in: 3600
+                    medical_record_token: "med_rec_token_abc123"
+                    admin_privileges: true
+        '401':
+          description: Invalid credentials
+
+  /patients:
+    post:
+      summary: Register new patient
+      description: Register a new patient
+      operationId: registerPatient
+      tags:
+        - Patients
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: registration_secret
+          in: header
+          required: true
+          description: Patient registration secret
+          schema:
+            type: string
+            example: "reg_secret_xyz789"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+            examples:
+              patient_registration:
+                summary: Patient registration with real sensitive data
+                value:
+                  patientId: 123456
+                  fullName: "João Silva Santos"
+                  dateOfBirth: "1990-03-15"
+                  email: "joao.silva@gmail.com"
+                  phone: "+5511987654321"
+                  cpf: "123.456.789-00"
+                  rg: "12.345.678-9"
+                  emergencyContact:
+                    name: "Maria Silva"
+                    relationship: "wife"
+                    phone: "+5511987654322"
+                    cpf: "987.654.321-00"
+                  address:
+                    street: "Rua das Flores, 123"
+                    city: "São Paulo"
+                    state: "SP"
+                    postalCode: "12345-678"
+                  internal_medical_id: "MED_ID_789123"
+                  admin_notes: "High-risk patient"
+      responses:
+        '201':
+          description: Patient registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '400':
+          description: Invalid patient data
+
+  /patients/{patientId}:
+    get:
+      summary: Get patient information
+      description: Retrieve patient information
+      operationId: getPatient
+      tags:
+        - Patients
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Direct patient ID
+          schema:
+            type: integer
+            example: 123456
+        - name: internal_access_key
+          in: header
+          required: false
+          description: Internal access key for privileged data
+          schema:
+            type: string
+            example: "internal_key_abc123"
+      responses:
+        '200':
+          description: Patient information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+              examples:
+                patient_data:
+                  summary: Patient data with real sensitive information
+                  value:
+                    patientId: 123456
+                    fullName: "Ana Santos Silva"
+                    dateOfBirth: "1985-07-20"
+                    email: "ana.santos@email.com"
+                    phone: "+5511999887766"
+                    cpf: "111.222.333-44"
+                    rg: "22.333.444-5"
+                    internal_medical_id: "MED_ID_555666"
+                    admin_notes: "VIP patient - special care required"
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Patient not found
+
+  /patients/{patientId}/medical-records:
+    get:
+      summary: Get patient medical records
+      description: Retrieve medical records for a patient
+      operationId: getPatientMedicalRecords
+      tags:
+        - Medical Records
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient ID
+          schema:
+            type: integer
+            example: 123456
+        - name: medical_record_token
+          in: header
+          required: true
+          description: Medical record access token
+          schema:
+            type: string
+            example: "med_rec_token_xyz789"
+      responses:
+        '200':
+          description: Medical records retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicalRecord'
+              examples:
+                medical_records:
+                  summary: Medical records with sensitive data
+                  value:
+                    - recordId: 789123
+                      patientId: 123456
+                      providerId: 456789
+                      recordType: "diagnosis"
+                      recordDate: "2024-01-15T14:30:00Z"
+                      summary: "Patient diagnosed with Type 2 Diabetes"
+                      diagnosis: "Type 2 Diabetes Mellitus, HbA1c 8.5%"
+                      treatment: "Metformin 500mg BID, dietary counseling"
+                      medical_access_token: "med_token_xyz789"
+                      internal_notes: "Patient non-compliant with previous treatments"
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Patient not found
+
+    post:
+      summary: Create medical record
+      description: Create a new medical record
+      operationId: createMedicalRecord
+      tags:
+        - Medical Records
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient ID
+          schema:
+            type: integer
+            example: 123456
+        - name: provider_secret_key
+          in: header
+          required: true
+          description: Provider secret key for record creation
+          schema:
+            type: string
+            example: "provider_secret_xyz789"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+      responses:
+        '201':
+          description: Medical record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+        '400':
+          description: Invalid medical record data
+
+  /appointments:
+    post:
+      summary: Schedule appointment
+      description: Schedule a new appointment
+      operationId: scheduleAppointment
+      tags:
+        - Appointments
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: scheduling_token
+          in: header
+          required: true
+          description: Appointment scheduling token
+          schema:
+            type: string
+            example: "sched_token_abc123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '201':
+          description: Appointment scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Invalid appointment data
+
+  /appointments/{appointmentId}:
+    get:
+      summary: Get appointment details
+      description: Retrieve appointment details
+      operationId: getAppointment
+      tags:
+        - Appointments
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: Appointment ID
+          schema:
+            type: integer
+            example: 345678
+      responses:
+        '200':
+          description: Appointment details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Appointment not found
+
+  /prescriptions:
+    post:
+      summary: Create prescription
+      description: Create a new prescription
+      operationId: createPrescription
+      tags:
+        - Prescriptions
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: prescription_auth_token
+          in: header
+          required: true
+          description: Prescription authorization token
+          schema:
+            type: string
+            example: "prescription_token_xyz789"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+            examples:
+              prescription_example:
+                summary: Prescription with sensitive access keys
+                value:
+                  patientId: 123456
+                  providerId: 456789
+                  medicationName: "Controlled Substance XYZ"
+                  dosage: "10mg"
+                  frequency: "once daily"
+                  duration: "30 days"
+                  pharmacy_access_key: "pharm_key_xyz789"
+                  controlled_substance_token: "controlled_token_abc123"
+      responses:
+        '201':
+          description: Prescription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '400':
+          description: Invalid prescription data
+
+  /patients/{patientId}/prescriptions:
+    get:
+      summary: Get patient prescriptions
+      description: Retrieve patient prescriptions
+      operationId: getPatientPrescriptions
+      tags:
+        - Prescriptions
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Patient ID
+          schema:
+            type: integer
+            example: 123456
+      responses:
+        '200':
+          description: Patient prescriptions retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prescription'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Patient not found
+
+  /admin/internal/patients:
+    get:
+      summary: Internal admin patient access
+      description: Internal endpoint for admin patient operations
+      operationId: getInternalPatients
+      tags:
+        - Internal
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: admin_secret_key
+          in: header
+          required: true
+          description: Admin secret key
+          schema:
+            type: string
+            example: "admin_secret_xyz123"
+        - name: database_password
+          in: query
+          required: true
+          description: Database access password
+          schema:
+            type: string
+            example: "db_password_123"
+      responses:
+        '200':
+          description: Internal patient data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Patient'
+        '401':
+          description: Unauthorized access
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Patients
+    description: Patient registration and profile management
+  - name: Medical Records
+    description: Medical record management and access
+  - name: Appointments
+    description: Appointment scheduling and management
+  - name: Prescriptions
+    description: Prescription creation and management
+  - name: Internal
+    description: Internal admin operations

@@ -1,0 +1,381 @@
+# Healthcare Security Configuration for Lokus
+# Tailored for healthcare APIs with strict medical data protection and LGPD compliance requirements
+
+# Global forbidden keys - critical security risks in healthcare APIs
+forbidden_keys:
+  # Authentication & Authorization
+  - "apiKey"
+  - "secretKey"
+  - "password"
+  - "secret"
+  - "key"
+  - "token"
+  - "auth"
+  - "credential"
+  - "authorization"
+  - "bearer"
+  - "jwt"
+  - "session"
+  
+  # Internal/Admin Access
+  - "admin"
+  - "internal"
+  - "master"
+  - "root"
+  - "system"
+  - "debug"
+  - "test"
+  - "dev"
+  - "development"
+  - "database"
+  
+  # Sensitive Medical Data
+  - "cpf"
+  - "cnpj"
+  - "rg"
+  - "ssn"
+  - "tax_id"
+  - "medical_id"
+  - "patient_id"
+  - "provider_id"
+  - "insurance_id"
+  - "record_id"
+  - "prescription_id"
+  
+  # Personal Health Information (PHI)
+  - "email"
+  - "phone"
+  - "address"
+  - "birth_date"
+  - "personal_id"
+  - "identity"
+  - "document"
+  - "medical_record"
+  - "diagnosis"
+  - "treatment"
+  - "medication"
+  - "prescription"
+  
+  # Healthcare-Specific Sensitive Data
+  - "insurance"
+  - "policy"
+  - "coverage"
+  - "billing"
+  - "payment"
+  - "medical"
+  - "health"
+  - "patient"
+  - "provider"
+  - "doctor"
+  - "nurse"
+  - "hospital"
+  - "clinic"
+  - "pharmacy"
+
+# Pattern-based forbidden keys - regex patterns for dynamic security violations
+forbidden_key_patterns:
+  # Token patterns
+  - ".*_token$"
+  - ".*_key$"
+  - ".*_secret$"
+  - ".*_password$"
+  - ".*_auth$"
+  - ".*_credential$"
+  
+  # Internal/Admin patterns
+  - "^internal_.*"
+  - "^admin_.*"
+  - "^master_.*"
+  - "^system_.*"
+  - "^debug_.*"
+  - "^test_.*"
+  - "^database_.*"
+  - "^db_.*"
+  
+  # Medical data patterns
+  - "^medical_.*"
+  - "^patient_.*"
+  - "^provider_.*"
+  - "^doctor_.*"
+  - "^insurance_.*"
+  - "^prescription_.*"
+  - "^pharmacy_.*"
+  - "^billing_.*"
+  
+  # Healthcare-specific patterns
+  - ".*_cpf$"
+  - ".*_cnpj$"
+  - ".*_rg$"
+  - ".*_ssn$"
+  - ".*_record$"
+  - ".*_diagnosis$"
+  - ".*_treatment$"
+  - ".*_medication$"
+  - ".*_insurance$"
+  - ".*_policy$"
+  
+  # Controlled substance patterns
+  - ".*controlled.*"
+  - ".*substance.*"
+  - ".*narcotic.*"
+  - ".*controlled_.*"
+  
+  # Access control patterns
+  - ".*_access$"
+  - ".*_privileges$"
+  - ".*_permission$"
+  - ".*_role$"
+
+# Path-specific forbidden keys - context-sensitive healthcare security rules
+forbidden_keys_at_paths:
+  # Authentication endpoints
+  - path: "paths./auth/login"
+    key: "secretKey"
+    reason: "Authentication endpoints should not expose secret keys in medical systems"
+  
+  - path: "paths./auth/login"
+    key: "apiKey"
+    reason: "API keys should not be documented in healthcare authentication endpoints"
+  
+  - path: "paths./auth/login"
+    key: "medical_admin_token"
+    reason: "Medical admin tokens should not be exposed in authentication documentation"
+  
+  - path: "paths./auth/login"
+    key: "database_key"
+    reason: "Database keys should never be exposed in healthcare API documentation"
+  
+  # Patient data endpoints
+  - path: "paths./patients"
+    key: "cpf"
+    reason: "CPF should not be directly exposed in patient endpoints due to LGPD requirements"
+  
+  - path: "paths./patients"
+    key: "rg"
+    reason: "RG should not be directly exposed in patient endpoints due to privacy laws"
+  
+  - path: "paths./patients"
+    key: "registration_secret"
+    reason: "Registration secrets should not be exposed in patient registration endpoints"
+  
+  - path: "components.schemas.Patient"
+    key: "internal_medical_id"
+    reason: "Internal medical IDs should not be exposed in patient schemas"
+  
+  - path: "components.schemas.Patient"
+    key: "admin_notes"
+    reason: "Admin notes should not be exposed in patient schemas"
+  
+  # Medical records endpoints
+  - path: "paths./patients/.*/medical-records"
+    key: "medical_record_token"
+    reason: "Medical record tokens should not be exposed in API documentation"
+  
+  - path: "paths./patients/.*/medical-records"
+    key: "provider_secret_key"
+    reason: "Provider secret keys should not be exposed in medical record endpoints"
+  
+  - path: "components.schemas.MedicalRecord"
+    key: "medical_access_token"
+    reason: "Medical access tokens should not be exposed in medical record schemas"
+  
+  - path: "components.schemas.MedicalRecord"
+    key: "internal_notes"
+    reason: "Internal medical notes should not be exposed in schemas"
+  
+  # Emergency contact data
+  - path: "components.schemas.EmergencyContact"
+    key: "cpf"
+    reason: "Emergency contact CPF should not be exposed due to LGPD requirements"
+  
+  # Insurance information
+  - path: "components.schemas.InsuranceInfo"
+    key: "insurance_secret_key"
+    reason: "Insurance secret keys should not be exposed in schemas"
+  
+  # Appointment endpoints
+  - path: "paths./appointments"
+    key: "scheduling_token"
+    reason: "Scheduling tokens should not be exposed in appointment endpoints"
+  
+  - path: "components.schemas.Appointment"
+    key: "scheduler_token"
+    reason: "Scheduler tokens should not be exposed in appointment schemas"
+  
+  # Prescription endpoints
+  - path: "paths./prescriptions"
+    key: "prescription_auth_token"
+    reason: "Prescription authorization tokens should not be exposed in documentation"
+  
+  - path: "components.schemas.Prescription"
+    key: "pharmacy_access_key"
+    reason: "Pharmacy access keys should not be exposed in prescription schemas"
+  
+  - path: "components.schemas.Prescription"
+    key: "controlled_substance_token"
+    reason: "Controlled substance tokens should not be exposed in schemas"
+  
+  # Internal/Admin endpoints
+  - path: "paths./admin"
+    key: "admin_secret_key"
+    reason: "Admin secret keys should never be exposed in API documentation"
+  
+  - path: "paths./admin"
+    key: "database_password"
+    reason: "Database passwords should never be exposed in API documentation"
+  
+  # Security scheme violations
+  - path: "components.securitySchemes"
+    key: "medical_record_token"
+    reason: "Medical record tokens should not be defined as security schemes"
+  
+  - path: "components.securitySchemes"
+    key: "admin_secret_key"
+    reason: "Admin secret keys should not be defined as security schemes"
+  
+  # Header parameter violations
+  - path: "parameters"
+    key: "internal_access_key"
+    reason: "Internal access keys should not be defined as parameters"
+  
+  - path: "parameters"
+    key: "provider_secret_key"
+    reason: "Provider secret keys should not be defined as parameters"
+  
+  - path: "parameters"
+    key: "medical_admin_token"
+    reason: "Medical admin tokens should not be defined as parameters"
+  
+  # Example violations
+  - path: "examples"
+    key: "med_admin_token_xyz789"
+    reason: "Medical admin tokens should not appear in examples"
+  
+  - path: "examples"
+    key: "db_key_secret_123"
+    reason: "Database keys should not appear in examples"
+
+# Allowed exceptions - legitimate healthcare use cases
+allowed_exceptions:
+  # OAuth2 is acceptable for secure healthcare authentication
+  - key: "OAuth2"
+    path_prefix: "components.securitySchemes"
+    reason: "OAuth2 is a secure authentication method appropriate for healthcare APIs"
+  
+  # Bearer token format is acceptable when properly used
+  - key: "bearerFormat"
+    path_prefix: "components.securitySchemes"
+    reason: "Bearer format specification is acceptable for JWT tokens in healthcare"
+  
+  # Token type in responses is acceptable for OAuth flows
+  - key: "token_type"
+    path_prefix: "responses"
+    reason: "Token type in authentication responses is acceptable for healthcare OAuth"
+  
+  # Access token in responses is acceptable for OAuth flows
+  - key: "access_token"
+    path_prefix: "responses"
+    reason: "Access token in authentication responses is acceptable for healthcare OAuth"
+  
+  # Expires in for token expiration is acceptable
+  - key: "expires_in"
+    path_prefix: "responses"
+    reason: "Token expiration time is acceptable in healthcare authentication responses"
+  
+  # Medical/Healthcare terminology when properly used
+  - key: "patientId"
+    path_prefix: "components.schemas"
+    reason: "Patient ID is acceptable when using UUID format for privacy"
+  
+  - key: "providerId"
+    path_prefix: "components.schemas"
+    reason: "Provider ID is acceptable when using UUID format for privacy"
+  
+  - key: "recordId"
+    path_prefix: "components.schemas"
+    reason: "Medical record ID is acceptable when using UUID format"
+  
+  - key: "appointmentId"
+    path_prefix: "components.schemas"
+    reason: "Appointment ID is acceptable when using UUID format"
+  
+  - key: "prescriptionId"
+    path_prefix: "components.schemas"
+    reason: "Prescription ID is acceptable when using UUID format"
+  
+  - key: "insuranceId"
+    path_prefix: "components.schemas"
+    reason: "Insurance ID is acceptable when using UUID format for privacy"
+  
+  # Medical data fields when properly described
+  - key: "medicationName"
+    path_prefix: "components.schemas"
+    reason: "Medication name is required for prescription management"
+  
+  - key: "dosage"
+    path_prefix: "components.schemas"
+    reason: "Dosage information is required for prescription safety"
+  
+  - key: "frequency"
+    path_prefix: "components.schemas"
+    reason: "Frequency information is required for prescription compliance"
+  
+  - key: "duration"
+    path_prefix: "components.schemas"
+    reason: "Duration information is required for prescription management"
+  
+  - key: "appointmentType"
+    path_prefix: "components.schemas"
+    reason: "Appointment type is required for healthcare scheduling"
+  
+  - key: "recordType"
+    path_prefix: "components.schemas"
+    reason: "Medical record type is required for healthcare record management"
+  
+  - key: "coverageType"
+    path_prefix: "components.schemas"
+    reason: "Insurance coverage type is required for billing and authorization"
+  
+  # Contact information when properly justified
+  - key: "contactEmail"
+    path_prefix: "components.schemas"
+    reason: "Contact email is acceptable when properly justified for healthcare communication"
+  
+  - key: "phoneNumber"
+    path_prefix: "components.schemas"
+    reason: "Phone number is acceptable when properly justified for emergency contact"
+  
+  - key: "emergencyContact"
+    path_prefix: "components.schemas"
+    reason: "Emergency contact information is required for patient safety"
+  
+  # Date/time fields
+  - key: "dateOfBirth"
+    path_prefix: "components.schemas"
+    reason: "Date of birth is required for patient identification and age-based care"
+  
+  - key: "appointmentDate"
+    path_prefix: "components.schemas"
+    reason: "Appointment date is required for healthcare scheduling"
+  
+  - key: "prescriptionDate"
+    path_prefix: "components.schemas"
+    reason: "Prescription date is required for medication management"
+  
+  - key: "recordDate"
+    path_prefix: "components.schemas"
+    reason: "Medical record date is required for healthcare documentation"
+  
+  # Address information when justified
+  - key: "address"
+    path_prefix: "components.schemas"
+    reason: "Address is acceptable when properly justified for healthcare delivery"
+  
+  # Insurance information when properly structured
+  - key: "insuranceInfo"
+    path_prefix: "components.schemas"
+    reason: "Insurance information is required for healthcare billing and coverage"
+  
+  - key: "policyNumber"
+    path_prefix: "components.schemas"
+    reason: "Policy number is required for insurance verification and billing"
