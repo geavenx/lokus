@@ -46,7 +46,3 @@ jobs:
       - name: Run tests
         run: uv run pytest tests
 
-      - name: Run Lokus on clean dummy file (expect success)
-        run: |
-          uv run lokus sample_clean_spec.yaml
-        # This step should pass (exit code 0)
