@@ -1,0 +1,545 @@
+openapi: 3.0.3
+info:
+  title: UnsafeBank Digital Banking API
+  version: "2.1.0"
+  description: |
+    A digital banking API with multiple security and compliance issues.
+    This API demonstrates common mistakes in financial service APIs
+    that violate security best practices and LGPD requirements.
+    
+    WARNING: This API specification contains sensitive information
+    and should not be used in production environments.
+    
+  contact:
+    name: UnsafeBank API Support
+    email: admin@unsafebank.com.br
+    url: https://developer.unsafebank.com.br
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.unsafebank.com.br/v2
+    description: Production server
+  - url: https://api-sandbox.unsafebank.com.br/v2
+    description: Sandbox server for testing
+
+security:
+  - ApiKeyAuth: []
+  - InternalAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+    InternalAuth:
+      type: apiKey
+      in: header
+      name: internal_admin_token
+      description: Internal admin token for privileged access
+    SecretAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Secret key authentication
+
+  schemas:
+    Account:
+      type: object
+      required:
+        - accountId
+        - accountType
+        - balance
+        - currency
+      properties:
+        accountId:
+          type: integer
+          description: Direct account number (sequential ID)
+          example: 1234567
+        accountType:
+          type: string
+          enum: [checking, savings, investment]
+          example: "checking"
+        balance:
+          type: number
+          format: decimal
+          example: 15420.50
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          example: "BRL"
+        lastTransactionDate:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        secretKey:
+          type: string
+          description: Account secret key for internal operations
+          example: "acc_secret_12345"
+
+    CustomerProfile:
+      type: object
+      required:
+        - customerId
+        - fullName
+        - email
+        - phoneNumber
+        - cpf
+      properties:
+        customerId:
+          type: integer
+          description: Direct customer ID
+          example: 987654
+        fullName:
+          type: string
+          example: "Maria Santos Silva"
+        email:
+          type: string
+          format: email
+          example: "maria.santos@gmail.com"
+        phoneNumber:
+          type: string
+          example: "+5511987654321"
+        cpf:
+          type: string
+          description: Customer CPF number
+          example: "123.456.789-00"
+        rg:
+          type: string
+          description: Customer RG number
+          example: "12.345.678-9"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1985-06-15"
+        address:
+          $ref: '#/components/schemas/Address'
+        internal_credit_score:
+          type: integer
+          description: Internal credit score (confidential)
+          example: 750
+        admin_notes:
+          type: string
+          description: Internal admin notes
+          example: "High-value customer, VIP treatment"
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+      properties:
+        street:
+          type: string
+          example: "Rua das Flores, 123"
+        city:
+          type: string
+          example: "São Paulo"
+        state:
+          type: string
+          example: "SP"
+        postalCode:
+          type: string
+          pattern: "^\\d{5}-?\\d{3}$"
+          example: "01234-567"
+
+    Transfer:
+      type: object
+      required:
+        - fromAccountId
+        - toAccountId
+        - amount
+        - currency
+      properties:
+        transferId:
+          type: integer
+          description: Sequential transfer ID
+          example: 5678901
+        fromAccountId:
+          type: integer
+          example: 1234567
+        toAccountId:
+          type: integer
+          example: 2345678
+        amount:
+          type: number
+          format: decimal
+          minimum: 0.01
+          example: 1000.00
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          example: "BRL"
+        description:
+          type: string
+          maxLength: 100
+          example: "Payment for services"
+        scheduledDate:
+          type: string
+          format: date-time
+          example: "2024-01-20T14:30:00Z"
+        internal_reference_token:
+          type: string
+          description: Internal reference token
+          example: "ref_token_abc123"
+
+    LoanApplication:
+      type: object
+      required:
+        - customerId
+        - loanType
+        - requestedAmount
+        - currency
+      properties:
+        applicationId:
+          type: integer
+          description: Sequential application ID
+          example: 112233
+        customerId:
+          type: integer
+          example: 987654
+        loanType:
+          type: string
+          enum: [personal, mortgage, auto, business]
+          example: "personal"
+        requestedAmount:
+          type: number
+          format: decimal
+          minimum: 1000.00
+          example: 50000.00
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          example: "BRL"
+        purpose:
+          type: string
+          maxLength: 200
+        monthlyIncome:
+          type: number
+          format: decimal
+          example: 8500.00
+        applicationStatus:
+          type: string
+          enum: [pending, under_review, approved, rejected]
+          example: "pending"
+        cpf:
+          type: string
+          description: Applicant CPF
+          example: "987.654.321-00"
+        social_security_token:
+          type: string
+          description: Social security verification token
+          example: "ss_token_xyz789"
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user
+      description: User authentication endpoint
+      operationId: authenticateUser
+      tags:
+        - Authentication
+      parameters:
+        - name: apiKey
+          in: header
+          required: true
+          description: API key for authentication
+          schema:
+            type: string
+            example: "api_key_12345"
+        - name: secretKey
+          in: header
+          required: true
+          description: Secret key for additional security
+          schema:
+            type: string
+            example: "secret_key_67890"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                internal_admin_key:
+                  type: string
+                  description: Internal admin key for privileged access
+                  example: "admin_key_secret"
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    example: 3600
+                  admin_token:
+                    type: string
+                    description: Admin token for internal use
+                    example: "internal_admin_token_abc123"
+        '401':
+          description: Invalid credentials
+
+  /accounts/{customerId}:
+    get:
+      summary: Get customer accounts
+      description: Retrieve all accounts for a customer
+      operationId: getCustomerAccounts
+      tags:
+        - Accounts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Direct customer ID (sequential number)
+          schema:
+            type: integer
+            example: 987654
+        - name: internal_access_token
+          in: header
+          required: false
+          description: Internal access token for privileged operations
+          schema:
+            type: string
+            example: "internal_token_xyz789"
+      responses:
+        '200':
+          description: List of customer accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                customer_accounts:
+                  summary: Customer accounts with real data
+                  value:
+                    - accountId: 1234567
+                      accountType: "checking"
+                      balance: 15420.50
+                      currency: "BRL"
+                      lastTransactionDate: "2024-01-15T10:30:00Z"
+                      secretKey: "acc_secret_12345"
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Customer not found
+
+  /transfers:
+    post:
+      summary: Create money transfer
+      description: Create a new money transfer
+      operationId: createTransfer
+      tags:
+        - Transfers
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: admin_secret_key
+          in: header
+          required: false
+          description: Admin secret key for high-value transfers
+          schema:
+            type: string
+            example: "admin_secret_key_12345"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transfer'
+            examples:
+              transfer_example:
+                summary: Transfer with sensitive data
+                value:
+                  fromAccountId: 1234567
+                  toAccountId: 2345678
+                  amount: 1000.00
+                  currency: "BRL"
+                  description: "Payment for services"
+                  internal_reference_token: "ref_token_abc123"
+      responses:
+        '201':
+          description: Transfer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '400':
+          description: Invalid transfer data
+        '401':
+          description: Unauthorized access
+
+  /customers/{customerId}/profile:
+    get:
+      summary: Get customer profile
+      description: Retrieve customer profile information
+      operationId: getCustomerProfile
+      tags:
+        - Customers
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Direct customer ID
+          schema:
+            type: integer
+            example: 987654
+      responses:
+        '200':
+          description: Customer profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProfile'
+              examples:
+                customer_profile:
+                  summary: Customer profile with real sensitive data
+                  value:
+                    customerId: 987654
+                    fullName: "João Silva Santos"
+                    email: "joao.silva@gmail.com"
+                    phoneNumber: "+5511987654321"
+                    cpf: "123.456.789-00"
+                    rg: "12.345.678-9"
+                    dateOfBirth: "1985-06-15"
+                    address:
+                      street: "Rua das Flores, 123"
+                      city: "São Paulo"
+                      state: "SP"
+                      postalCode: "01234-567"
+                    internal_credit_score: 750
+                    admin_notes: "High-value customer, VIP treatment"
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Customer not found
+
+  /loans/applications:
+    post:
+      summary: Submit loan application
+      description: Submit a new loan application
+      operationId: submitLoanApplication
+      tags:
+        - Loans
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: verification_token
+          in: header
+          required: true
+          description: Verification token for loan applications
+          schema:
+            type: string
+            example: "verification_token_abc123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplication'
+            examples:
+              loan_application:
+                summary: Loan application with sensitive data
+                value:
+                  customerId: 987654
+                  loanType: "personal"
+                  requestedAmount: 50000.00
+                  currency: "BRL"
+                  purpose: "Home renovation"
+                  monthlyIncome: 8500.00
+                  applicationStatus: "pending"
+                  cpf: "987.654.321-00"
+                  social_security_token: "ss_token_xyz789"
+      responses:
+        '201':
+          description: Loan application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplication'
+        '400':
+          description: Invalid application data
+        '401':
+          description: Unauthorized access
+
+  /admin/internal/customers:
+    get:
+      summary: Internal admin endpoint
+      description: Internal endpoint for admin operations
+      operationId: getInternalCustomers
+      tags:
+        - Internal
+      security:
+        - InternalAuth: []
+      parameters:
+        - name: internal_admin_token
+          in: header
+          required: true
+          description: Internal admin token
+          schema:
+            type: string
+            example: "internal_admin_token_xyz123"
+        - name: master_key
+          in: query
+          required: true
+          description: Master key for database access
+          schema:
+            type: string
+            example: "master_key_12345"
+      responses:
+        '200':
+          description: Internal customer data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerProfile'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Accounts
+    description: Account management and information
+  - name: Transfers
+    description: Money transfer operations
+  - name: Customers
+    description: Customer profile management
+  - name: Loans
+    description: Loan application and management
+  - name: Internal
+    description: Internal admin operations

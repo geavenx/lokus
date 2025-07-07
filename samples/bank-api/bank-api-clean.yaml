@@ -1,0 +1,453 @@
+openapi: 3.0.3
+info:
+  title: SecureBank Digital Banking API
+  version: "2.1.0"
+  description: |
+    A secure digital banking API designed with best practices for financial services.
+    This API implements proper authentication, authorization, and data protection
+    measures in compliance with LGPD and financial regulations.
+    
+    **Security Features:**
+    - OAuth2 authentication with proper scopes
+    - Rate limiting on all endpoints
+    - Input validation and sanitization
+    - Audit logging for all transactions
+    
+    **Privacy Compliance:**
+    - LGPD compliant data handling
+    - Minimal data collection principle
+    - Clear purpose definitions for data processing
+    - Proper consent management
+    
+  contact:
+    name: SecureBank API Support
+    email: api-support@securebank.com.br
+    url: https://developer.securebank.com.br
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.securebank.com.br/v2
+    description: Production server
+  - url: https://api-sandbox.securebank.com.br/v2
+    description: Sandbox server for testing
+
+security:
+  - OAuth2:
+      - read:accounts
+      - write:transfers
+      - read:profile
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.securebank.com.br/oauth/authorize
+          tokenUrl: https://auth.securebank.com.br/oauth/token
+          scopes:
+            read:accounts: Read account information
+            write:transfers: Perform money transfers
+            read:profile: Read customer profile
+            write:profile: Update customer profile
+            read:loans: View loan applications
+
+  schemas:
+    Account:
+      type: object
+      required:
+        - accountId
+        - accountType
+        - balance
+        - currency
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          description: Unique identifier for the account (UUID format for privacy)
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        accountType:
+          type: string
+          enum: [checking, savings, investment]
+          description: Type of bank account
+          example: "checking"
+        balance:
+          type: number
+          format: decimal
+          description: Current account balance in specified currency
+          example: 15420.50
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: Currency code in ISO 4217 format
+          example: "BRL"
+        lastTransactionDate:
+          type: string
+          format: date-time
+          description: Date and time of the last transaction
+          example: "2024-01-15T10:30:00Z"
+
+    CustomerProfile:
+      type: object
+      required:
+        - customerId
+        - fullName
+        - email
+        - phoneNumber
+      properties:
+        customerId:
+          type: string
+          format: uuid
+          description: Unique customer identifier (UUID format for privacy protection)
+          example: "c1d2e3f4-a5b6-7890-cdef-123456789abc"
+        fullName:
+          type: string
+          description: Customer's full legal name (required for account verification)
+          example: "João Silva Santos"
+        email:
+          type: string
+          format: email
+          description: Customer's email address (used for account notifications and security alerts)
+          example: "joao.silva@email.com"
+        phoneNumber:
+          type: string
+          pattern: "^\\+55\\d{10,11}$"
+          description: Brazilian phone number with country code (required for two-factor authentication)
+          example: "+5511987654321"
+        dateOfBirth:
+          type: string
+          format: date
+          description: Customer's date of birth (required for age verification and regulatory compliance)
+          example: "1985-06-15"
+        address:
+          $ref: '#/components/schemas/Address'
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+      properties:
+        street:
+          type: string
+          description: Street address (required for identity verification)
+          example: "Rua das Flores, 123"
+        city:
+          type: string
+          description: City name
+          example: "São Paulo"
+        state:
+          type: string
+          description: State or province
+          example: "SP"
+        postalCode:
+          type: string
+          pattern: "^\\d{5}-?\\d{3}$"
+          description: Brazilian postal code (CEP)
+          example: "01234-567"
+
+    Transfer:
+      type: object
+      required:
+        - fromAccountId
+        - toAccountId
+        - amount
+        - currency
+        - description
+      properties:
+        transferId:
+          type: string
+          format: uuid
+          description: Unique transfer identifier
+          example: "t1a2b3c4-d5e6-7890-fghi-jklmnopqrstu"
+        fromAccountId:
+          type: string
+          format: uuid
+          description: Source account identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        toAccountId:
+          type: string
+          format: uuid
+          description: Destination account identifier
+          example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+        amount:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Transfer amount (minimum R$ 0.01)
+          example: 1000.00
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: Currency code
+          example: "BRL"
+        description:
+          type: string
+          maxLength: 100
+          description: Transfer description (limited to 100 characters)
+          example: "Payment for services"
+        scheduledDate:
+          type: string
+          format: date-time
+          description: Scheduled execution date (optional for future transfers)
+          example: "2024-01-20T14:30:00Z"
+
+    LoanApplication:
+      type: object
+      required:
+        - customerId
+        - loanType
+        - requestedAmount
+        - currency
+        - purpose
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+          description: Unique loan application identifier
+          example: "l1m2n3o4-p5q6-7890-rstu-vwxyz1234567"
+        customerId:
+          type: string
+          format: uuid
+          description: Customer identifier
+          example: "c1d2e3f4-a5b6-7890-cdef-123456789abc"
+        loanType:
+          type: string
+          enum: [personal, mortgage, auto, business]
+          description: Type of loan being requested
+          example: "personal"
+        requestedAmount:
+          type: number
+          format: decimal
+          minimum: 1000.00
+          description: Requested loan amount (minimum R$ 1,000.00)
+          example: 50000.00
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: Currency code
+          example: "BRL"
+        purpose:
+          type: string
+          maxLength: 200
+          description: Purpose of the loan (required for risk assessment and regulatory compliance)
+          example: "Home renovation and improvements"
+        monthlyIncome:
+          type: number
+          format: decimal
+          description: Applicant's monthly income (required for creditworthiness assessment)
+          example: 8500.00
+        applicationStatus:
+          type: string
+          enum: [pending, under_review, approved, rejected]
+          description: Current status of the loan application
+          example: "pending"
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user
+      description: |
+        Authenticate user credentials and obtain access token.
+        This endpoint implements secure authentication with rate limiting
+        to prevent brute force attacks.
+      operationId: authenticateUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User's login identifier
+                  example: "user123"
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: "********"
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token for API authentication
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    description: Token expiration time in seconds
+                    example: 3600
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Too many login attempts
+
+  /accounts/{customerId}:
+    get:
+      summary: Get customer accounts
+      description: |
+        Retrieve all accounts associated with a customer.
+        This endpoint requires proper authentication and authorization.
+        Only the account owner or authorized representatives can access this data.
+      operationId: getCustomerAccounts
+      tags:
+        - Accounts
+      security:
+        - OAuth2:
+            - read:accounts
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer unique identifier (UUID format)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of customer accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Customer not found
+
+  /transfers:
+    post:
+      summary: Create money transfer
+      description: |
+        Create a new money transfer between accounts.
+        This endpoint implements strong authentication, input validation,
+        and fraud detection mechanisms.
+      operationId: createTransfer
+      tags:
+        - Transfers
+      security:
+        - OAuth2:
+            - write:transfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transfer'
+      responses:
+        '201':
+          description: Transfer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '400':
+          description: Invalid transfer data
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Insufficient funds or permissions
+        '422':
+          description: Transfer validation failed
+
+  /customers/{customerId}/profile:
+    get:
+      summary: Get customer profile
+      description: |
+        Retrieve customer profile information.
+        This endpoint handles sensitive personal data and requires
+        proper authorization and audit logging.
+      operationId: getCustomerProfile
+      tags:
+        - Customers
+      security:
+        - OAuth2:
+            - read:profile
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer unique identifier (UUID format)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Customer profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProfile'
+        '401':
+          description: Unauthorized access
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Customer not found
+
+  /loans/applications:
+    post:
+      summary: Submit loan application
+      description: |
+        Submit a new loan application for review.
+        This endpoint collects financial information for credit assessment
+        and regulatory compliance purposes.
+      operationId: submitLoanApplication
+      tags:
+        - Loans
+      security:
+        - OAuth2:
+            - write:loans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplication'
+      responses:
+        '201':
+          description: Loan application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplication'
+        '400':
+          description: Invalid application data
+        '401':
+          description: Unauthorized access
+        '422':
+          description: Application validation failed
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Accounts
+    description: Account management and information
+  - name: Transfers
+    description: Money transfer operations
+  - name: Customers
+    description: Customer profile management
+  - name: Loans
+    description: Loan application and management

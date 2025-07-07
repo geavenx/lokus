@@ -1,0 +1,235 @@
+# Banking Security Configuration for Lokus
+# Tailored for financial services APIs with strict security and LGPD compliance requirements
+
+# Global forbidden keys - common security risks in banking APIs
+forbidden_keys:
+  # Authentication & Authorization
+  - "apiKey"
+  - "secretKey"
+  - "password"
+  - "secret"
+  - "key"
+  - "token"
+  - "auth"
+  - "credential"
+  - "authorization"
+  - "bearer"
+  - "jwt"
+  - "session"
+  
+  # Internal/Admin Access
+  - "admin"
+  - "internal"
+  - "master"
+  - "root"
+  - "system"
+  - "debug"
+  - "test"
+  - "dev"
+  - "development"
+  
+  # Sensitive Financial Data
+  - "cpf"
+  - "cnpj"
+  - "rg"
+  - "ssn"
+  - "tax_id"
+  - "account_number"
+  - "routing_number"
+  - "card_number"
+  - "cvv"
+  - "pin"
+  - "balance"
+  - "credit_score"
+  - "salary"
+  - "income"
+  
+  # Personal Information
+  - "email"
+  - "phone"
+  - "address"
+  - "birth_date"
+  - "personal_id"
+  - "identity"
+  - "document"
+
+# Pattern-based forbidden keys - regex patterns for dynamic security violations
+forbidden_key_patterns:
+  # Token patterns
+  - ".*_token$"
+  - ".*_key$"
+  - ".*_secret$"
+  - ".*_password$"
+  - ".*_auth$"
+  - ".*_credential$"
+  
+  # Internal/Admin patterns
+  - "^internal_.*"
+  - "^admin_.*"
+  - "^master_.*"
+  - "^system_.*"
+  - "^debug_.*"
+  - "^test_.*"
+  
+  # Sensitive data patterns
+  - ".*_cpf$"
+  - ".*_cnpj$"
+  - ".*_rg$"
+  - ".*_ssn$"
+  - ".*_account$"
+  - ".*_balance$"
+  - ".*_score$"
+  - ".*_income$"
+  - ".*_salary$"
+  
+  # Personal info patterns
+  - ".*_email$"
+  - ".*_phone$"
+  - ".*_address$"
+  - ".*_birth.*"
+  - ".*_personal.*"
+  - ".*_private.*"
+
+# Path-specific forbidden keys - context-sensitive security rules
+forbidden_keys_at_paths:
+  # Authentication endpoints should not expose secrets
+  - path: "paths./auth/login"
+    key: "secretKey"
+    reason: "Authentication endpoints should not expose secret keys in documentation"
+  
+  - path: "paths./auth/login"
+    key: "apiKey"
+    reason: "API keys should not be documented in authentication endpoints"
+  
+  # Customer data endpoints
+  - path: "paths./customers"
+    key: "cpf"
+    reason: "CPF should not be directly exposed in customer endpoints"
+  
+  - path: "paths./customers"
+    key: "rg"
+    reason: "RG should not be directly exposed in customer endpoints"
+  
+  - path: "components.schemas.CustomerProfile"
+    key: "internal_credit_score"
+    reason: "Internal credit scores should not be exposed in customer profiles"
+  
+  - path: "components.schemas.CustomerProfile"
+    key: "admin_notes"
+    reason: "Admin notes should not be exposed in customer profiles"
+  
+  # Account endpoints
+  - path: "paths./accounts"
+    key: "secretKey"
+    reason: "Account endpoints should not expose secret keys"
+  
+  - path: "components.schemas.Account"
+    key: "secretKey"
+    reason: "Account schemas should not contain secret keys"
+  
+  # Transfer endpoints
+  - path: "paths./transfers"
+    key: "admin_secret_key"
+    reason: "Transfer endpoints should not expose admin secret keys"
+  
+  - path: "components.schemas.Transfer"
+    key: "internal_reference_token"
+    reason: "Internal reference tokens should not be exposed in transfer schemas"
+  
+  # Loan application endpoints
+  - path: "paths./loans"
+    key: "social_security_token"
+    reason: "Social security tokens should not be exposed in loan endpoints"
+  
+  - path: "components.schemas.LoanApplication"
+    key: "social_security_token"
+    reason: "Social security tokens should not be exposed in loan application schemas"
+  
+  # Internal/Admin endpoints
+  - path: "paths./admin"
+    key: "internal_admin_token"
+    reason: "Internal admin tokens should not be exposed in API documentation"
+  
+  - path: "paths./admin"
+    key: "master_key"
+    reason: "Master keys should never be exposed in API documentation"
+  
+  # Security scheme violations
+  - path: "components.securitySchemes"
+    key: "internal_admin_token"
+    reason: "Internal admin tokens should not be defined as security schemes"
+  
+  # Header parameter violations
+  - path: "parameters"
+    key: "internal_admin_token"
+    reason: "Internal admin tokens should not be defined as parameters"
+  
+  - path: "parameters"
+    key: "admin_secret_key"
+    reason: "Admin secret keys should not be defined as parameters"
+  
+  - path: "parameters"
+    key: "master_key"
+    reason: "Master keys should not be defined as parameters"
+
+# Allowed exceptions - legitimate use cases that should not trigger violations
+allowed_exceptions:
+  # OAuth2 is acceptable for secure authentication
+  - key: "OAuth2"
+    path_prefix: "components.securitySchemes"
+    reason: "OAuth2 is a secure authentication method"
+  
+  # Bearer token format is acceptable when properly used
+  - key: "bearerFormat"
+    path_prefix: "components.securitySchemes"
+    reason: "Bearer format specification is acceptable for JWT tokens"
+  
+  # Token type in responses is acceptable for OAuth flows
+  - key: "token_type"
+    path_prefix: "responses"
+    reason: "Token type in authentication responses is acceptable"
+  
+  # Access token in responses is acceptable for OAuth flows
+  - key: "access_token"
+    path_prefix: "responses"
+    reason: "Access token in authentication responses is acceptable"
+  
+  # Expires in for token expiration is acceptable
+  - key: "expires_in"
+    path_prefix: "responses"
+    reason: "Token expiration time is acceptable in authentication responses"
+  
+  # Currency codes are acceptable
+  - key: "currency"
+    path_prefix: "components.schemas"
+    reason: "Currency codes are required for financial transactions"
+  
+  # Account type is acceptable
+  - key: "accountType"
+    path_prefix: "components.schemas"
+    reason: "Account type is required for account management"
+  
+  # Application status is acceptable
+  - key: "applicationStatus"
+    path_prefix: "components.schemas"
+    reason: "Application status is required for loan processing"
+  
+  # Loan type is acceptable
+  - key: "loanType"
+    path_prefix: "components.schemas"
+    reason: "Loan type is required for loan applications"
+  
+  # Customer ID in paths is acceptable when using UUIDs
+  - key: "customerId"
+    path_prefix: "paths"
+    reason: "Customer ID is acceptable when using UUID format for privacy"
+  
+  # Transfer ID is acceptable
+  - key: "transferId"
+    path_prefix: "components.schemas"
+    reason: "Transfer ID is required for transaction tracking"
+  
+  # Application ID is acceptable
+  - key: "applicationId"
+    path_prefix: "components.schemas"
+    reason: "Application ID is required for loan tracking"
