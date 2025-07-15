@@ -67,10 +67,26 @@ flowchart TD
 
 ## Installation
 
-- **Using docker (recommended):**
+- **Install from [PyPI](https://pypi.org/project/lokus/) (recommended):**
+
+    ```bash
+    pip install lokus
+    lokus --version
+    ```
+
+- **Using docker:**
 
     ```bash
     docker run -qit --rm geaven/lokus --version
+    ```
+
+- **Using [uv](https://docs.astral.sh/uv/):**
+
+    ```bash
+    git clone https://github.com/geavenx/lokus.git
+    cd lokus
+    uv sync --locked --all-extras
+    uv run lokus --version
     ```
 
 - **Building from source:**
@@ -82,14 +98,6 @@ flowchart TD
     lokus --version
     ```
 
-- **Using [uv](https://docs.astral.sh/uv/):**
-
-    ```bash
-    git clone https://github.com/geavenx/lokus.git
-    cd lokus
-    uv sync --locked --all-extras
-    uv run lokus --version
-    ```
 
 ## Quick Start
 
@@ -120,7 +128,7 @@ flowchart TD
 
     # Generate JSON report
     lokus --json path/to/your/api.yaml
-    
+
     # Generate PDF report
     lokus --pdf path/to/your/api.yaml
     ```
@@ -257,7 +265,7 @@ For detailed setup instructions, customization options, and troubleshooting:
    # .github/workflows/api-security.yml
    name: API Security Validation
    on: [push, pull_request]
-   
+
    jobs:
      lokus-validation:
        runs-on: ubuntu-latest
